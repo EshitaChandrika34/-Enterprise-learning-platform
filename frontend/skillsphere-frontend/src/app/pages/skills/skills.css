@@ -1,0 +1,821 @@
+/* =====================================================
+   SKILLSPHERE - SKILLS PAGE
+   SAME THEME AS DASHBOARD / LEARNING / SETTINGS
+===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: Inter, Arial, sans-serif;
+}
+
+
+/* =====================================================
+   APP LAYOUT
+===================================================== */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text-main);
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: var(--sidebar-width);
+  min-height: 100vh;
+
+  padding: 28px 20px;
+
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+
+  z-index: 10;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.brand {
+  padding: 0 10px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-title {
+  color: var(--text-main);
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  margin-top: 5px;
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.sidebar-line {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 27px;
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-menu a {
+  display: block;
+  width: 100%;
+
+  padding: 16px 17px;
+
+  color: var(--text-secondary);
+
+  text-decoration: none;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  border: 1px solid transparent;
+  border-radius: 9px;
+
+  transition: 0.2s ease;
+}
+
+.nav-menu a:hover {
+  color: var(--text-main);
+  background: var(--surface-hover);
+}
+
+.nav-menu a.active {
+  padding-left: 14px;
+
+  color: var(--text-main);
+
+  background: var(--accent-soft);
+
+  border-color: var(--accent-border);
+  border-left: 4px solid var(--accent);
+}
+
+
+/* =====================================================
+   MAIN CONTENT
+===================================================== */
+
+.main-content {
+  margin-left: var(--sidebar-width);
+
+  width: calc(100% - var(--sidebar-width));
+
+  min-height: 100vh;
+
+  padding: 40px 50px 60px;
+
+  background: var(--page-bg);
+  color: var(--text-main);
+}
+
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 35px;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  color: var(--text-main);
+
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.page-header p {
+  margin: 10px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 16px;
+}
+
+.eyebrow,
+.orange-label {
+  margin: 0 0 8px;
+
+  color: var(--accent);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   ADD BUTTON
+===================================================== */
+
+.add-button,
+.primary-button {
+  padding: 12px 20px;
+
+  background: var(--accent);
+
+  color: white;
+
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.add-button:hover,
+.primary-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.stats-grid,
+.summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(200px, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 25px;
+}
+
+.stat-card,
+.summary-card {
+  padding: 22px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  background: var(--surface-soft);
+
+  color: var(--accent);
+
+  border-radius: 10px;
+
+  font-size: 23px;
+}
+
+.stat-info h2 {
+  margin: 0;
+
+  color: var(--text-main);
+
+  font-size: 28px;
+}
+
+.stat-info p {
+  margin: 5px 0 0;
+
+  color: var(--text-secondary);
+}
+
+.summary-card span {
+  display: block;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+}
+
+.summary-card strong {
+  display: block;
+
+  margin-top: 8px;
+
+  color: var(--text-main);
+
+  font-size: 28px;
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-section,
+.search-box {
+  margin-bottom: 24px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 16px 20px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.search-icon {
+  color: var(--text-muted);
+  font-size: 19px;
+}
+
+.search-box input {
+  flex: 1;
+
+  width: 100%;
+
+  padding: 3px;
+
+  background: transparent;
+
+  color: var(--text-main);
+
+  border: none;
+  outline: none;
+
+  font-size: 15px;
+}
+
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+
+
+/* =====================================================
+   SKILLS SECTION
+===================================================== */
+
+.skills-section {
+  padding: 25px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 25px;
+}
+
+.section-header h2 {
+  margin: 0;
+
+  color: var(--text-main);
+
+  font-size: 23px;
+}
+
+.section-header p {
+  margin: 7px 0 0;
+
+  color: var(--text-secondary);
+}
+
+.skill-count {
+  color: var(--accent);
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+
+/* =====================================================
+   SKILLS GRID
+===================================================== */
+
+.skills-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(300px, 1fr));
+
+  gap: 18px;
+}
+
+
+/* =====================================================
+   SKILL CARD
+===================================================== */
+
+.skill-card {
+  padding: 24px;
+
+  background: var(--surface);
+
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  transition: 0.2s ease;
+}
+
+.skill-card:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--accent-border);
+}
+
+
+/* =====================================================
+   CARD TOP
+===================================================== */
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.skill-icon {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--surface-soft);
+
+  color: var(--accent);
+
+  border-radius: 10px;
+
+  font-size: 22px;
+}
+
+.skill-title h3,
+.skill-card h3 {
+  margin: 0;
+
+  color: var(--text-main);
+
+  font-size: 20px;
+}
+
+.category {
+  display: inline-block;
+
+  margin-top: 7px;
+
+  color: var(--accent);
+
+  font-size: 12px;
+
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   DESCRIPTION
+===================================================== */
+
+.description,
+.skill-description {
+  min-height: 45px;
+
+  margin: 18px 0;
+
+  color: var(--text-secondary);
+
+  line-height: 1.6;
+}
+
+
+/* =====================================================
+   LEVEL SECTION
+===================================================== */
+
+.level-section {
+  padding: 17px 0;
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+
+  color: var(--text-secondary);
+}
+
+.level-header strong {
+  color: var(--text-main);
+}
+
+.stars {
+  margin: 12px 0;
+
+  color: #fbbf24;
+
+  font-size: 21px;
+
+  letter-spacing: 3px;
+}
+
+
+/* =====================================================
+   LEVEL CONTROLS
+===================================================== */
+
+.level-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.level-controls button {
+  width: 31px;
+  height: 31px;
+
+  background: var(--surface-soft);
+
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 17px;
+}
+
+.level-controls button:hover:not(:disabled) {
+  background: var(--accent);
+  color: white;
+
+  border-color: var(--accent);
+}
+
+.level-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.level-controls span {
+  color: var(--text-secondary);
+}
+
+
+/* =====================================================
+   SKILL META
+===================================================== */
+
+.skill-meta {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+
+  margin: 18px 0;
+}
+
+.skill-meta span {
+  display: block;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+}
+
+.skill-meta strong {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--text-main);
+}
+
+
+/* =====================================================
+   EMPLOYEE COUNT
+===================================================== */
+
+.employee-count {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 17px 0;
+
+  color: var(--text-secondary);
+}
+
+.employee-count strong {
+  color: var(--text-main);
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.card-actions,
+.management-actions {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.card-actions button,
+.secondary-button,
+.danger-button {
+  padding: 9px 16px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+}
+
+.edit-button,
+.secondary-button {
+  background: var(--surface-soft);
+
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+}
+
+.edit-button:hover,
+.secondary-button:hover {
+  border-color: var(--accent);
+
+  color: var(--accent);
+}
+
+.delete-button,
+.danger-button {
+  background: transparent;
+
+  color: #ef4444;
+
+  border: 1px solid #ef4444;
+}
+
+.delete-button:hover,
+.danger-button:hover {
+  background: #ef4444;
+
+  color: white;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.employee-skill-action {
+  margin-top: 18px;
+}
+
+
+/* =====================================================
+   NO RESULTS
+===================================================== */
+
+.no-results,
+.empty-state {
+  grid-column: 1 / -1;
+
+  padding: 45px 20px;
+
+  color: var(--text-secondary);
+
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 40px;
+}
+
+.no-results h3 {
+  margin: 14px 0 8px;
+
+  color: var(--text-main);
+}
+
+.no-results p {
+  color: var(--text-secondary);
+}
+
+
+/* =====================================================
+   LIGHT THEME
+===================================================== */
+
+html.light-theme .app-layout,
+html.light-theme .main-content {
+  background: var(--page-bg);
+  color: var(--text-main);
+}
+
+html.light-theme .sidebar {
+  background: var(--sidebar-bg);
+  border-right-color: var(--border);
+}
+
+html.light-theme .skill-card,
+html.light-theme .skills-section,
+html.light-theme .stat-card,
+html.light-theme .summary-card,
+html.light-theme .search-box {
+  background: var(--surface);
+
+  color: var(--text-main);
+
+  border-color: var(--border);
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media (max-width: 800px) {
+
+  .sidebar {
+    width: 220px;
+  }
+
+  .main-content {
+    margin-left: 220px;
+
+    width: calc(100% - 220px);
+
+    padding: 30px;
+  }
+
+  .page-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 20px;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    position: relative;
+
+    width: 100%;
+
+    min-height: auto;
+  }
+
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+
+    width: 100%;
+
+    padding: 25px 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

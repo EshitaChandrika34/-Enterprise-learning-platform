@@ -1,0 +1,733 @@
+<div class="employees-page">
+
+  <!-- ========================================= -->
+  <!-- SIDEBAR -->
+  <!-- ========================================= -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+        Enterprise Learning
+      </div>
+
+      <div class="brand-subtitle">
+        SKILL & CAREER PLATFORM
+      </div>
+
+    </div>
+
+    <div class="sidebar-line"></div>
+
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+
+        Dashboard
+
+      </a>
+
+
+      <a
+        *ngIf="
+          authService.canManageEmployees()
+        "
+        routerLink="/employees"
+        routerLinkActive="active">
+
+        Employees
+
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+
+        Learning
+
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+
+        Skills
+
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+
+        Certifications
+
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+
+        Career
+
+      </a>
+
+
+      <a
+        *ngIf="
+          authService.canViewAnalytics()
+        "
+        routerLink="/analytics"
+        routerLinkActive="active">
+
+        Analytics
+
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+
+        Settings
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ========================================= -->
+  <!-- MAIN CONTENT -->
+  <!-- ========================================= -->
+
+  <main class="main-content">
+
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Employee Management
+        </h1>
+
+        <p>
+          Manage and monitor your organization's employees.
+        </p>
+
+      </div>
+
+
+      <button
+        *ngIf="
+          authService.canAddEmployee()
+        "
+        class="add-button"
+        type="button"
+        (click)="openAddForm()">
+
+        + Add Employee
+
+      </button>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- SEARCH -->
+    <!-- ========================================= -->
+
+    <div class="search-box">
+
+      <span>
+        🔍
+      </span>
+
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+        placeholder="Search by name, email, department or role...">
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- EMPLOYEE LIST -->
+    <!-- ========================================= -->
+
+    <div class="employee-card">
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Employee List
+          </h2>
+
+          <p>
+            Organization employees
+          </p>
+
+        </div>
+
+
+        <span class="employee-count">
+
+          {{ filteredEmployees.length }}
+
+          Employees
+
+        </span>
+
+      </div>
+
+
+      <!-- LOADING -->
+
+      <div
+        class="no-data"
+        *ngIf="loading">
+
+        Loading employees...
+
+      </div>
+
+
+      <!-- TABLE -->
+
+      <div
+        class="table-container"
+        *ngIf="!loading">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Employee
+              </th>
+
+              <th>
+                Email
+              </th>
+
+              <th>
+                Department
+              </th>
+
+              <th>
+                Designation
+              </th>
+
+              <th>
+                Role
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th
+                *ngIf="
+                  authService.canEditEmployee()
+                  ||
+                  authService.canDeleteEmployee()
+                ">
+
+                Actions
+
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let employee
+                of filteredEmployees
+              ">
+
+
+              <!-- NAME -->
+
+              <td>
+
+                <div class="employee-name">
+
+                  <div class="avatar">
+
+                    {{
+                      employee.firstName
+                        ? employee.firstName
+                            .charAt(0)
+                            .toUpperCase()
+                        : '?'
+                    }}
+
+                  </div>
+
+
+                  <strong>
+
+                    {{ employee.firstName }}
+
+                    {{ employee.lastName }}
+
+                  </strong>
+
+                </div>
+
+              </td>
+
+
+              <!-- EMAIL -->
+
+              <td>
+
+                {{
+                  employee.email
+                  ||
+                  '-'
+                }}
+
+              </td>
+
+
+              <!-- DEPARTMENT -->
+
+              <td>
+
+                {{
+                  employee.department
+                  ||
+                  '-'
+                }}
+
+              </td>
+
+
+              <!-- DESIGNATION -->
+
+              <td>
+
+                {{
+                  employee.designation
+                  ||
+                  '-'
+                }}
+
+              </td>
+
+
+              <!-- ROLE -->
+
+              <td>
+
+                {{
+                  employee.role
+                  ||
+                  'EMPLOYEE'
+                }}
+
+              </td>
+
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status"
+                  [class.inactive]="
+                    (
+                      employee.status
+                      ||
+                      ''
+                    )
+                      .toLowerCase()
+                    ===
+                    'inactive'
+                  ">
+
+                  {{
+                    employee.status
+                    ||
+                    'ACTIVE'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+
+              <td
+                *ngIf="
+                  authService.canEditEmployee()
+                  ||
+                  authService.canDeleteEmployee()
+                ">
+
+
+                <button
+                  *ngIf="
+                    authService.canEditEmployee()
+                  "
+                  class="edit-button"
+                  type="button"
+                  (click)="
+                    editEmployee(
+                      employee
+                    )
+                  ">
+
+                  Edit
+
+                </button>
+
+
+                <button
+                  *ngIf="
+                    authService.canDeleteEmployee()
+                    &&
+                    employee.employeeId
+                    != null
+                  "
+                  class="delete-button"
+                  type="button"
+                  (click)="
+                    deleteEmployee(
+                      employee.employeeId!
+                    )
+                  ">
+
+                  Delete
+
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- NO DATA -->
+
+            <tr
+              *ngIf="
+                filteredEmployees.length
+                ===
+                0
+              ">
+
+              <td
+                [attr.colspan]="
+                  authService.canEditEmployee()
+                  ||
+                  authService.canDeleteEmployee()
+                    ? 7
+                    : 6
+                "
+                class="no-data">
+
+                <div>
+                  👥
+                </div>
+
+                <h3>
+                  No Employees Found
+                </h3>
+
+                <p>
+                  No employee matches the current search.
+                </p>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ========================================= -->
+  <!-- ADD / EDIT EMPLOYEE MODAL -->
+  <!-- ========================================= -->
+
+  <div
+    class="modal-background"
+    *ngIf="showForm">
+
+    <div class="employee-form">
+
+
+      <!-- FORM HEADER -->
+
+      <div class="form-header">
+
+        <h2>
+
+          {{
+            isEditing
+              ? 'Edit Employee'
+              : 'Add New Employee'
+          }}
+
+        </h2>
+
+
+        <button
+          class="close-button"
+          type="button"
+          [disabled]="saving"
+          (click)="closeForm()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- FIRST NAME -->
+
+      <label>
+        First Name *
+      </label>
+
+      <input
+        type="text"
+        name="firstName"
+        [(ngModel)]="employee.firstName"
+        placeholder="Enter first name">
+
+
+      <!-- LAST NAME -->
+
+      <label>
+        Last Name *
+      </label>
+
+      <input
+        type="text"
+        name="lastName"
+        [(ngModel)]="employee.lastName"
+        placeholder="Enter last name">
+
+
+      <!-- EMAIL -->
+
+      <label>
+        Email *
+      </label>
+
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="employee.email"
+        placeholder="employee@gmail.com">
+
+
+      <!-- LOGIN PASSWORD -->
+      <!-- ONLY WHEN CREATING -->
+
+      <ng-container
+        *ngIf="!isEditing">
+
+        <label>
+          Login Password *
+        </label>
+
+        <input
+          type="password"
+          name="employeePassword"
+          [(ngModel)]="employeePassword"
+          placeholder="Example: Employee@123"
+          minlength="6">
+
+        <small class="field-help">
+
+          The employee will use this
+          email and password to login.
+
+        </small>
+
+      </ng-container>
+
+
+      <!-- PHONE -->
+
+      <label>
+        Phone
+      </label>
+
+      <input
+        type="text"
+        name="phone"
+        [(ngModel)]="employee.phone"
+        placeholder="Enter phone number">
+
+
+      <!-- DEPARTMENT -->
+
+      <label>
+        Department *
+      </label>
+
+      <input
+        type="text"
+        name="department"
+        [(ngModel)]="employee.department"
+        placeholder="Enter department">
+
+
+      <!-- DESIGNATION -->
+
+      <label>
+        Designation
+      </label>
+
+      <input
+        type="text"
+        name="designation"
+        [(ngModel)]="employee.designation"
+        placeholder="Enter designation">
+
+
+      <!-- EXPERIENCE -->
+
+      <label>
+        Experience
+      </label>
+
+      <input
+        type="number"
+        name="experience"
+        [(ngModel)]="employee.experience"
+        min="0"
+        placeholder="Enter experience in years">
+
+
+      <!-- ROLE -->
+
+      <label>
+        Role
+      </label>
+
+      <select
+        name="role"
+        [(ngModel)]="employee.role">
+
+
+        <option value="EMPLOYEE">
+          Employee
+        </option>
+
+
+        <option value="HR">
+          HR
+        </option>
+
+
+        <option
+          value="ADMIN"
+          *ngIf="
+            authService.isAdmin()
+          ">
+
+          Administrator
+
+        </option>
+
+      </select>
+
+
+      <!-- STATUS -->
+
+      <label>
+        Status
+      </label>
+
+      <select
+        name="status"
+        [(ngModel)]="employee.status">
+
+        <option value="ACTIVE">
+          Active
+        </option>
+
+        <option value="INACTIVE">
+          Inactive
+        </option>
+
+      </select>
+
+
+      <!-- BUTTONS -->
+
+      <div class="form-buttons">
+
+        <button
+          class="cancel-button"
+          type="button"
+          [disabled]="saving"
+          (click)="closeForm()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          class="save-button"
+          type="button"
+          [disabled]="saving"
+          (click)="saveEmployee()">
+
+          {{
+            saving
+              ? 'Saving...'
+              : (
+                  isEditing
+                    ? 'Update Employee'
+                    : 'Create Employee'
+                )
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

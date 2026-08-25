@@ -1,0 +1,635 @@
+<div class="app-layout">
+
+  <!-- ==========================================
+       SIDEBAR
+  =========================================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+        SkillSphere
+      </div>
+
+      <div class="brand-subtitle">
+        LEARNING PLATFORM
+      </div>
+
+    </div>
+
+    <div class="sidebar-line"></div>
+
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+
+        Dashboard
+
+      </a>
+
+
+      <!-- ADMIN + HR ONLY -->
+
+      <a
+        *ngIf="
+          authService.canManageEmployees()
+        "
+        routerLink="/employees"
+        routerLinkActive="active">
+
+        Employees
+
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+
+        Learning
+
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+
+        Skills
+
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+
+        Certifications
+
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+
+        Career
+
+      </a>
+
+
+      <!-- ADMIN + HR ONLY -->
+
+      <a
+        *ngIf="
+          authService.isAdmin()
+          ||
+          authService.isHR()
+        "
+        routerLink="/analytics"
+        routerLinkActive="active">
+
+        Analytics
+
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+
+        Settings
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ==========================================
+       MAIN CONTENT
+  =========================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ==========================================
+         PAGE HEADER
+    =========================================== -->
+
+    <header class="page-header">
+
+      <div>
+
+        <p class="eyebrow">
+          SKILL DEVELOPMENT
+        </p>
+
+
+        <!-- EMPLOYEE -->
+
+        <h1
+          *ngIf="
+            authService.isEmployee()
+          ">
+
+          My Skills
+
+        </h1>
+
+
+        <!-- HR -->
+
+        <h1
+          *ngIf="
+            authService.isHR()
+          ">
+
+          Workforce Skills
+
+        </h1>
+
+
+        <!-- ADMIN -->
+
+        <h1
+          *ngIf="
+            authService.isAdmin()
+          ">
+
+          Skills Management
+
+        </h1>
+
+
+        <!-- EMPLOYEE -->
+
+        <p
+          *ngIf="
+            authService.isEmployee()
+          ">
+
+          Select skills you want to develop
+          and track your learning interests.
+
+        </p>
+
+
+        <!-- HR -->
+
+        <p
+          *ngIf="
+            authService.isHR()
+          ">
+
+          View and manage workforce skill
+          development and employee expertise.
+
+        </p>
+
+
+        <!-- ADMIN -->
+
+        <p
+          *ngIf="
+            authService.isAdmin()
+          ">
+
+          Manage organization skills
+          and workforce capabilities.
+
+        </p>
+
+      </div>
+
+
+      <!-- ======================================
+           ADD SKILL
+           ADMIN + HR
+      ======================================= -->
+
+      <button
+        *ngIf="
+          authService.canAddSkill()
+        "
+        class="primary-button"
+        type="button"
+        (click)="addSkill()">
+
+        Add Skill
+
+      </button>
+
+    </header>
+
+
+    <!-- ==========================================
+         EMPLOYEE SUMMARY
+    =========================================== -->
+
+    <section
+      class="summary-grid"
+      *ngIf="
+        authService.isEmployee()
+      ">
+
+
+      <div class="summary-card">
+
+        <span>
+          Available Skills
+        </span>
+
+        <strong>
+          {{ totalSkills }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          My Selected Skills
+        </span>
+
+        <strong>
+  {{ totalSkills }}
+</strong>
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         ADMIN / HR SUMMARY
+    =========================================== -->
+
+    <section
+      class="summary-grid"
+      *ngIf="
+        authService.isAdmin()
+        ||
+        authService.isHR()
+      ">
+
+
+      <div class="summary-card">
+
+        <span>
+          Total Skills
+        </span>
+
+        <strong>
+          {{ totalSkills }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Employee Skills
+        </span>
+
+        <strong>
+          {{ totalEmployees }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Advanced Skills
+        </span>
+
+        <strong>
+          {{ advancedSkills }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Average Skill Level
+        </span>
+
+        <strong>
+          {{ averageLevel }}/5
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         SEARCH
+    =========================================== -->
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+
+        [placeholder]="
+          authService.isEmployee()
+            ? 'Search skills you want to learn'
+            : 'Search by skill name, category or description'
+        ">
+
+    </div>
+
+
+    <!-- ==========================================
+         LOADING
+    =========================================== -->
+
+    <div
+      class="empty-state"
+      *ngIf="loading">
+
+      Loading skills...
+
+    </div>
+
+
+    <!-- ==========================================
+         SKILLS GRID
+    =========================================== -->
+
+    <section
+      class="skills-grid"
+      *ngIf="!loading">
+
+
+      <article
+        class="skill-card"
+        *ngFor="
+          let skill
+          of filteredSkills
+        ">
+
+
+        <!-- ======================================
+             SKILL NAME
+        ======================================= -->
+
+        <div class="skill-card-header">
+
+          <div>
+
+            <h3>
+              {{ skill.skillName }}
+            </h3>
+
+
+            <span class="category">
+
+              {{
+                skill.category
+                ||
+                'General'
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================
+             DESCRIPTION
+        ======================================= -->
+
+        <p class="skill-description">
+
+          {{
+            skill.description
+            ||
+            'No description available.'
+          }}
+
+        </p>
+
+
+        <!-- ======================================
+             EMPLOYEE ONLY:
+             PERSONAL LEVEL
+        ======================================= -->
+
+        <div
+          class="skill-meta"
+          *ngIf="
+            authService.isEmployee()
+          ">
+
+
+          <div>
+
+            <span>
+              My Skill Level
+            </span>
+
+
+            <strong>
+
+              {{
+                getLevelText(
+                  skill.level || 0
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Level Score
+            </span>
+
+
+            <strong>
+
+              {{
+                skill.level || 0
+              }}/5
+
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- ======================================
+             EMPLOYEE ACTIONS
+        ======================================= -->
+
+        <div
+          class="employee-skill-action"
+          *ngIf="
+            authService.isEmployee()
+          ">
+
+
+          <!-- NOT SELECTED -->
+
+          <button
+            *ngIf="
+              !isSkillSelected(
+                skill
+              )
+            "
+            class="
+              primary-button
+              full-width
+            "
+            type="button"
+            (click)="
+              selectSkill(
+                skill
+              )
+            ">
+
+            Select Skill
+
+          </button>
+
+
+          <!-- ALREADY SELECTED -->
+
+          <button
+            *ngIf="
+              isSkillSelected(
+                skill
+              )
+            "
+            class="
+              secondary-button
+              full-width
+            "
+            type="button"
+            disabled>
+
+            Selected
+
+          </button>
+
+        </div>
+
+
+        <!-- ======================================
+             HR ACTIONS
+             EDIT ONLY
+        ======================================= -->
+
+        <div
+          class="management-actions"
+          *ngIf="
+            authService.isHR()
+          ">
+
+
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="
+              editSkill(
+                skill
+              )
+            ">
+
+            Edit
+
+          </button>
+
+        </div>
+
+
+        <!-- ======================================
+             ADMIN ACTIONS
+             EDIT + DELETE
+        ======================================= -->
+
+        <div
+          class="management-actions"
+          *ngIf="
+            authService.isAdmin()
+          ">
+
+
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="
+              editSkill(
+                skill
+              )
+            ">
+
+            Edit
+
+          </button>
+
+
+          <button
+            *ngIf="
+              skill.skillId
+            "
+            class="danger-button"
+            type="button"
+            (click)="
+              deleteSkill(
+                skill.skillId!
+              )
+            ">
+
+            Delete
+
+          </button>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- ==========================================
+         NO RESULTS
+    =========================================== -->
+
+    <div
+      class="empty-state"
+      *ngIf="
+        !loading
+        &&
+        filteredSkills.length === 0
+      ">
+
+      No skills available.
+
+    </div>
+
+  </main>
+
+</div>

@@ -1,0 +1,262 @@
+<div class="login-wrapper">
+
+  <div class="login-container">
+
+    <!-- ================================= -->
+    <!-- LEFT BRANDING PANEL -->
+    <!-- ================================= -->
+
+    <div class="brand-panel">
+
+      <div class="brand-content">
+
+        <div class="logo">
+
+          <span class="logo-icon">
+            ⬢
+          </span>
+
+          <span class="logo-text">
+            Enterprise Learning
+          </span>
+
+        </div>
+
+
+        <h1>
+          Enterprise Learning Platform
+        </h1>
+
+
+        <p class="platform-subtitle">
+          Skill & Career Guidance System
+        </p>
+
+
+        <p class="platform-description">
+          Manage employees, learning,
+          skills, certifications,
+          career development and
+          workforce analytics —
+          all in one integrated platform.
+        </p>
+
+
+        <div class="stats-row">
+
+          <div class="stat">
+
+            <span class="stat-value">
+              Workforce
+            </span>
+
+            <span class="stat-label">
+              Management
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <span class="stat-value">
+              Skills
+            </span>
+
+            <span class="stat-label">
+              Development
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <span class="stat-value">
+              Learning
+            </span>
+
+            <span class="stat-label">
+              Progress
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <span class="stat-value">
+              Career
+            </span>
+
+            <span class="stat-label">
+              Guidance
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================= -->
+    <!-- RIGHT LOGIN FORM PANEL -->
+    <!-- ================================= -->
+
+    <div class="form-panel">
+
+      <div class="form-content">
+
+        <h2>
+          Welcome Back
+        </h2>
+
+
+        <p class="subtitle">
+          Sign in to your Enterprise Learning account
+        </p>
+
+
+        <div
+          *ngIf="errorMessage"
+          class="error-banner">
+
+          {{ errorMessage }}
+
+        </div>
+
+
+        <form
+          (ngSubmit)="onLogin()">
+
+
+          <!-- EMAIL -->
+
+          <div class="form-group">
+
+            <label for="email">
+              Email
+            </label>
+
+
+            <input
+              id="email"
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+            />
+
+          </div>
+
+
+          <!-- PASSWORD -->
+
+          <div class="form-group">
+
+            <label for="password">
+              Password
+            </label>
+
+
+            <div class="password-field">
+
+              <input
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+
+
+              <button
+                type="button"
+                class="toggle-btn"
+                (click)="togglePassword()">
+
+                {{
+                  showPassword
+                    ? 'Hide'
+                    : 'Show'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- OPTIONS -->
+
+          <div class="form-options">
+
+            <label class="remember-me">
+
+              <input
+                type="checkbox"
+              />
+
+              Remember me
+
+            </label>
+
+
+            <a
+              routerLink="/forgot-password"
+              class="forgot-link">
+
+              Forgot Password?
+
+            </a>
+
+          </div>
+
+
+          <!-- LOGIN BUTTON -->
+
+          <button
+            type="submit"
+            class="login-btn"
+            [disabled]="isLoading">
+
+            <span
+              *ngIf="!isLoading">
+
+              Sign In
+
+            </span>
+
+
+            <span
+              *ngIf="isLoading">
+
+              Signing in...
+
+            </span>
+
+          </button>
+
+        </form>
+
+
+        <p class="footer-note">
+
+          Enterprise Learning Platform
+          · Skill & Career Guidance System
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

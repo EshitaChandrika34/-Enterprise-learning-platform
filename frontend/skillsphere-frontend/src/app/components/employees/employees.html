@@ -1,0 +1,464 @@
+<div class="employees-page">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <h2 class="logo">
+      SkillSphere
+    </h2>
+
+
+    <nav>
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>📊</span>
+        Dashboard
+      </a>
+
+
+      <a
+        routerLink="/employees"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>👥</span>
+        Employees
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>📚</span>
+        Learning
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>⭐</span>
+        Skills
+      </a>
+
+
+      <a
+        routerLink="/certificates"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>🏆</span>
+        Certificates
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>🚀</span>
+        Career
+      </a>
+
+
+      <a
+        routerLink="/analytics"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>📈</span>
+        Analytics
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span>⚙️</span>
+        Settings
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+
+  <!-- MAIN CONTENT -->
+
+  <main class="main-content">
+
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Employee Management
+        </h1>
+
+        <p>
+          Manage and monitor your organization's employees
+        </p>
+
+      </div>
+
+
+      <button
+        class="add-button"
+        (click)="openAddForm()"
+      >
+
+        + Add Employee
+
+      </button>
+
+    </div>
+
+
+
+    <!-- SEARCH -->
+
+    <div class="search-box">
+
+      <span>🔍</span>
+
+      <input
+        type="text"
+        placeholder="Search employees by name, email, department or role..."
+        [(ngModel)]="searchText"
+      >
+
+    </div>
+
+
+
+    <!-- EMPLOYEE TABLE -->
+
+    <div class="employee-card">
+
+      <div class="table-header">
+
+        <h2>
+          Employee List
+        </h2>
+
+        <span class="employee-count">
+
+          {{ filteredEmployees.length }}
+          Employees
+
+        </span>
+
+      </div>
+
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Name</th>
+
+              <th>Email</th>
+
+              <th>Department</th>
+
+              <th>Role</th>
+
+              <th>Status</th>
+
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+
+            <tr
+              *ngFor="let employee of filteredEmployees"
+            >
+
+              <td>
+
+                <div class="employee-name">
+
+                  <div class="avatar">
+
+                    {{ employee.name.charAt(0).toUpperCase() }}
+
+                  </div>
+
+                  <strong>
+
+                    {{ employee.name }}
+
+                  </strong>
+
+                </div>
+
+              </td>
+
+
+              <td>
+
+                {{ employee.email }}
+
+              </td>
+
+
+              <td>
+
+                {{ employee.department }}
+
+              </td>
+
+
+              <td>
+
+                {{ employee.role }}
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="status"
+                  [class.inactive]="
+                    employee.status === 'Inactive'
+                  "
+                >
+
+                  {{ employee.status }}
+
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <button
+                  class="edit-button"
+                  (click)="editEmployee(employee)"
+                >
+
+                  Edit
+
+                </button>
+
+
+                <button
+                  class="delete-button"
+                  (click)="deleteEmployee(employee.id)"
+                >
+
+                  Delete
+
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY -->
+
+            <tr
+              *ngIf="filteredEmployees.length === 0"
+            >
+
+              <td
+                colspan="6"
+                class="no-data"
+              >
+
+                <div class="empty-icon">
+                  👥
+                </div>
+
+                <h3>
+                  No Employees Found
+                </h3>
+
+                <p>
+                  Add your first employee to get started.
+                </p>
+
+              </td>
+
+            </tr>
+
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+
+  </main>
+
+
+
+  <!-- ADD / EDIT MODAL -->
+
+  <div
+    class="modal-background"
+    *ngIf="showForm"
+  >
+
+    <div class="employee-form">
+
+
+      <div class="form-header">
+
+        <h2>
+
+          {{
+            isEditing
+            ? 'Edit Employee'
+            : 'Add New Employee'
+          }}
+
+        </h2>
+
+
+        <button
+          class="close-button"
+          (click)="closeForm()"
+        >
+
+          ×
+
+        </button>
+
+      </div>
+
+
+
+      <label>
+        Employee Name
+      </label>
+
+      <input
+        type="text"
+        placeholder="Enter employee name"
+        [(ngModel)]="employee.name"
+      >
+
+
+
+      <label>
+        Email
+      </label>
+
+      <input
+        type="email"
+        placeholder="Enter email address"
+        [(ngModel)]="employee.email"
+      >
+
+
+
+      <label>
+        Department
+      </label>
+
+      <input
+        type="text"
+        placeholder="Enter department"
+        [(ngModel)]="employee.department"
+      >
+
+
+
+      <label>
+        Role
+      </label>
+
+      <input
+        type="text"
+        placeholder="Enter employee role"
+        [(ngModel)]="employee.role"
+      >
+
+
+
+      <label>
+        Status
+      </label>
+
+      <select
+        [(ngModel)]="employee.status"
+      >
+
+        <option value="Active">
+          Active
+        </option>
+
+        <option value="Inactive">
+          Inactive
+        </option>
+
+      </select>
+
+
+
+      <div class="form-buttons">
+
+        <button
+          class="cancel-button"
+          (click)="closeForm()"
+        >
+
+          Cancel
+
+        </button>
+
+
+        <button
+          class="save-button"
+          (click)="saveEmployee()"
+        >
+
+          {{
+            isEditing
+            ? 'Update Employee'
+            : 'Add Employee'
+          }}
+
+        </button>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>

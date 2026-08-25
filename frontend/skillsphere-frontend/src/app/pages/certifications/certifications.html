@@ -1,0 +1,1051 @@
+<div class="certifications-page">
+
+
+  <!-- ==========================================
+       SIDEBAR
+  =========================================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+  Enterprise Learning
+</div>
+
+<div class="brand-subtitle">
+  SKILL & CAREER PLATFORM
+</div>
+
+    </div>
+
+
+    <div class="sidebar-line"></div>
+
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+
+        Dashboard
+
+      </a>
+
+
+      <a
+        *ngIf="authService.canViewEmployees()"
+        routerLink="/employees"
+        routerLinkActive="active">
+
+        Employees
+
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+
+        Learning
+
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+
+        Skills
+
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+
+        Certifications
+
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+
+        Career
+
+      </a>
+
+
+      <a
+        *ngIf="authService.canViewAnalytics()"
+        routerLink="/analytics"
+        routerLinkActive="active">
+
+        Analytics
+
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+
+        Settings
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- ==========================================
+       MAIN CONTENT
+  =========================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ==========================================
+         EMPLOYEE HEADER
+    =========================================== -->
+
+    <header
+      class="page-header"
+      *ngIf="authService.isEmployee()">
+
+      <div>
+
+        <p class="eyebrow">
+          CERTIFICATIONS
+        </p>
+
+        <h1>
+          My Certificates
+        </h1>
+
+        <p>
+          View your learning progress,
+          eligibility and earned certificates.
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================
+         HR HEADER
+    =========================================== -->
+
+    <header
+      class="page-header"
+      *ngIf="authService.isHR()">
+
+      <div>
+
+        <p class="eyebrow">
+          WORKFORCE CERTIFICATIONS
+        </p>
+
+        <h1>
+          Certification Management
+        </h1>
+
+        <p>
+          Monitor employee course progress,
+          eligibility and issued certificates.
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================
+         ADMIN HEADER
+    =========================================== -->
+
+    <header
+      class="page-header"
+      *ngIf="authService.isAdmin()">
+
+      <div>
+
+        <p class="eyebrow">
+          CERTIFICATION MANAGEMENT
+        </p>
+
+        <h1>
+          Employee Certifications
+        </h1>
+
+        <p>
+          View employee enrollments,
+          learning progress and certificate status.
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <!-- ==========================================
+         SUMMARY
+    =========================================== -->
+
+    <section class="metric-grid">
+
+
+      <div>
+
+        <small>
+
+          {{
+            authService.isEmployee()
+              ? 'My Enrollments'
+              : 'Total Enrollments'
+          }}
+
+        </small>
+
+        <strong>
+          {{ roleRows.length }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <small>
+          Eligible
+        </small>
+
+        <strong>
+          {{ eligibleCount }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <small>
+          Certificates Issued
+        </small>
+
+        <strong>
+          {{ issuedCount }}
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         CATALOG
+    =========================================== -->
+
+    <section class="catalog-card">
+
+
+      <!-- ======================================
+           TOOLBAR
+      ======================================= -->
+
+      <div class="toolbar">
+
+        <div class="search">
+
+          <span>
+            🔍
+          </span>
+
+
+          <input
+            [(ngModel)]="searchText"
+
+            [placeholder]="
+              authService.isEmployee()
+                ? 'Search course or certificate'
+                : 'Search employee, course or certificate'
+            ">
+
+        </div>
+
+
+        <select
+          [(ngModel)]="statusFilter">
+
+          <option value="ALL">
+            All statuses
+          </option>
+
+          <option value="ISSUED">
+            Issued
+          </option>
+
+          <option value="ELIGIBLE">
+            Eligible
+          </option>
+
+          <option value="NOT_ELIGIBLE">
+            Not Eligible
+          </option>
+
+          <option value="NOT_GENERATED">
+            Not Generated
+          </option>
+
+        </select>
+
+
+        <button
+          class="refresh"
+          type="button"
+          (click)="loadCertifications()">
+
+          Refresh
+
+        </button>
+
+      </div>
+
+
+      <!-- ======================================
+           ERROR
+      ======================================= -->
+
+      <div
+        class="empty"
+        *ngIf="errorMessage">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <!-- ======================================
+           TABLE
+      ======================================= -->
+
+      <div class="table-wrap">
+
+        <table>
+
+
+          <!-- ==================================
+               ADMIN / HR TABLE
+          =================================== -->
+
+          <thead
+            *ngIf="
+              authService.isAdmin()
+              ||
+              authService.isHR()
+            ">
+
+            <tr>
+
+              <th>
+                Employee
+              </th>
+
+              <th>
+                Course
+              </th>
+
+              <th>
+                Enrollment
+              </th>
+
+              <th>
+                Progress
+              </th>
+
+              <th>
+                Eligibility
+              </th>
+
+              <th>
+                Certificate
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <!-- ==================================
+               EMPLOYEE TABLE
+          =================================== -->
+
+          <thead
+            *ngIf="
+              authService.isEmployee()
+            ">
+
+            <tr>
+
+              <th>
+                Course
+              </th>
+
+              <th>
+                Progress
+              </th>
+
+              <th>
+                Eligibility
+              </th>
+
+              <th>
+                Certificate Number
+              </th>
+
+              <th>
+                Issue Date
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+
+            <!-- ==================================
+                 ADMIN / HR ROWS
+            =================================== -->
+
+            <ng-container
+              *ngIf="
+                authService.isAdmin()
+                ||
+                authService.isHR()
+              ">
+
+
+              <tr
+                *ngFor="
+                  let row
+                  of filteredRows
+                ">
+
+
+                <!-- EMPLOYEE -->
+
+                <td>
+
+                  <div class="credential">
+
+                    <span class="credential-icon">
+
+                      {{
+                        row.employeeName
+                          .charAt(0)
+                      }}
+
+                    </span>
+
+
+                    <div>
+
+                      <strong>
+                        {{ row.employeeName }}
+                      </strong>
+
+                      <small>
+
+                        {{ row.employeeCode }}
+
+                        ·
+
+                        {{ row.department }}
+
+                      </small>
+
+                      <small>
+                        {{ row.designation }}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- COURSE -->
+
+                <td>
+
+                  <strong>
+                    {{ row.courseName }}
+                  </strong>
+
+                  <br>
+
+                  <small>
+                    Course ID:
+                    {{ row.courseId }}
+                  </small>
+
+                </td>
+
+
+                <!-- ENROLLMENT -->
+
+                <td>
+
+                  <strong>
+                    #{{ row.enrollmentId }}
+                  </strong>
+
+                  <br>
+
+                  <small>
+                    {{ row.enrollmentStatus }}
+                  </small>
+
+                </td>
+
+
+                <!-- PROGRESS -->
+
+                <td>
+
+                  <div class="progress-info">
+
+                    <strong>
+
+                      {{
+                        row.progressPercentage
+                      }}%
+
+                    </strong>
+
+
+                    <div class="mini-progress">
+
+                      <div
+                        class="mini-progress-fill"
+
+                        [style.width.%]="
+                          row.progressPercentage
+                        ">
+
+                      </div>
+
+                    </div>
+
+
+                    <small>
+
+                      {{
+                        row.completionStatus
+                      }}
+
+                    </small>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ELIGIBILITY -->
+
+                <td>
+
+                  <span
+                    class="eligibility eligible"
+
+                    *ngIf="
+                      row.eligible
+                    ">
+
+                    ELIGIBLE
+
+                  </span>
+
+
+                  <span
+                    class="eligibility not-eligible"
+
+                    *ngIf="
+                      !row.eligible
+                    ">
+
+                    NOT ELIGIBLE
+
+                  </span>
+
+
+                  <small
+                    class="threshold-text">
+
+                    Minimum 80%
+
+                  </small>
+
+                </td>
+
+
+                <!-- CERTIFICATE -->
+
+                <td>
+
+                  <ng-container
+                    *ngIf="
+                      row.certificateId
+                    ">
+
+                    <strong>
+
+                      {{
+                        row.certificateNumber
+                      }}
+
+                    </strong>
+
+                    <br>
+
+                    <small>
+                      {{ row.issueDate }}
+                    </small>
+
+                  </ng-container>
+
+
+                  <span
+                    *ngIf="
+                      !row.certificateId
+                    "
+                    class="not-generated">
+
+                    Not Generated
+
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="status"
+                    *ngIf="
+                      row.certificateId
+                    ">
+
+                    {{
+                      row.certificateStatus
+                    }}
+
+                  </span>
+
+
+                  <span
+                    class="status pending"
+                    *ngIf="
+                      !row.certificateId
+                    ">
+
+                    PENDING
+
+                  </span>
+
+                </td>
+
+
+                <!-- ACTIONS -->
+
+                <td>
+
+                  <div class="action-buttons">
+
+
+                    <!-- VIEW -->
+
+                    <a
+                      *ngIf="
+                        row.certificateId
+                      "
+
+                      class="view-button"
+
+                      [routerLink]="[
+                        '/certificate',
+                        row.certificateId
+                      ]">
+
+                      View
+
+                    </a>
+
+
+                    <!-- GENERATE -->
+
+                    <button
+                      *ngIf="
+                        row.eligible
+                        &&
+                        !row.certificateId
+                      "
+
+                      class="generate-button"
+
+                      type="button"
+
+                      [disabled]="
+                        generatingEnrollmentId
+                        ===
+                        row.enrollmentId
+                      "
+
+                      (click)="
+                        generateCertificate(
+                          row
+                        )
+                      ">
+
+                      {{
+                        generatingEnrollmentId
+                        ===
+                        row.enrollmentId
+                          ? 'Generating...'
+                          : 'Generate'
+                      }}
+
+                    </button>
+
+
+                    <!-- NOT ELIGIBLE -->
+
+                    <span
+                      *ngIf="
+                        !row.eligible
+                        &&
+                        !row.certificateId
+                      "
+                      class="disabled-action">
+
+                      Awaiting 80%
+
+                    </span>
+
+
+                    <!-- ADMIN DELETE -->
+
+                    <button
+                      *ngIf="
+                        authService
+                          .canDeleteCertificate()
+                        &&
+                        row.certificateId
+                      "
+
+                      class="delete"
+
+                      type="button"
+
+                      (click)="
+                        deleteCertificate(
+                          row
+                        )
+                      ">
+
+                      Delete
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            </ng-container>
+
+
+            <!-- ==================================
+                 EMPLOYEE ROWS
+            =================================== -->
+
+            <ng-container
+              *ngIf="
+                authService.isEmployee()
+              ">
+
+
+              <tr
+                *ngFor="
+                  let row
+                  of filteredRows
+                ">
+
+
+                <!-- COURSE -->
+
+                <td>
+
+                  <div class="credential">
+
+                    <span class="credential-icon">
+                      ◆
+                    </span>
+
+                    <div>
+
+                      <strong>
+                        {{ row.courseName }}
+                      </strong>
+
+                      <small>
+                        Enrollment:
+                        {{ row.enrollmentId }}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- PROGRESS -->
+
+                <td>
+
+                  <strong>
+                    {{ row.progressPercentage }}%
+                  </strong>
+
+                  <br>
+
+                  <small>
+                    {{ row.completionStatus }}
+                  </small>
+
+                </td>
+
+
+                <!-- ELIGIBILITY -->
+
+                <td>
+
+                  <span
+                    class="eligibility eligible"
+                    *ngIf="
+                      row.eligible
+                    ">
+
+                    ELIGIBLE
+
+                  </span>
+
+
+                  <span
+                    class="eligibility not-eligible"
+                    *ngIf="
+                      !row.eligible
+                    ">
+
+                    NOT ELIGIBLE
+
+                  </span>
+
+                </td>
+
+
+                <!-- CERTIFICATE NUMBER -->
+
+                <td>
+
+                  {{
+                    row.certificateNumber
+                  }}
+
+                </td>
+
+
+                <!-- DATE -->
+
+                <td>
+
+                  {{
+                    row.issueDate
+                  }}
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="status"
+                    *ngIf="
+                      row.certificateId
+                    ">
+
+                    {{
+                      row.certificateStatus
+                    }}
+
+                  </span>
+
+
+                  <span
+                    class="status pending"
+                    *ngIf="
+                      !row.certificateId
+                    ">
+
+                    NOT GENERATED
+
+                  </span>
+
+                </td>
+
+
+                <!-- ACTION -->
+
+                <td>
+
+                  <a
+                    *ngIf="
+                      row.certificateId
+                    "
+
+                    class="view-button"
+
+                    [routerLink]="[
+                      '/certificate',
+                      row.certificateId
+                    ]">
+
+                    View Certificate
+
+                  </a>
+
+
+                  <button
+                    *ngIf="
+                      row.eligible
+                      &&
+                      !row.certificateId
+                    "
+
+                    class="generate-button"
+
+                    type="button"
+
+                    (click)="
+                      generateCertificate(
+                        row
+                      )
+                    ">
+
+                    Generate Certificate
+
+                  </button>
+
+
+                  <span
+                    *ngIf="
+                      !row.eligible
+                      &&
+                      !row.certificateId
+                    "
+                    class="disabled-action">
+
+                    Complete 80% to unlock
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </ng-container>
+
+
+            <!-- ==================================
+                 LOADING
+            =================================== -->
+
+            <tr
+              *ngIf="loading">
+
+              <td
+                colspan="8"
+                class="empty">
+
+                Loading certification information...
+
+              </td>
+
+            </tr>
+
+
+            <!-- ==================================
+                 EMPTY
+            =================================== -->
+
+            <tr
+              *ngIf="
+                !loading
+                &&
+                filteredRows.length
+                === 0
+              ">
+
+              <td
+                colspan="8"
+                class="empty">
+
+                No certification records available.
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

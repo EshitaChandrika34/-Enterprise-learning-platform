@@ -1,0 +1,713 @@
+:root {
+  --page-bg: #090d12;
+  --sidebar-bg: #0e1319;
+  --surface: #121820;
+  --surface-soft: #171e27;
+  --surface-hover: #1d2530;
+
+  --text-main: #f8fafc;
+  --text-secondary: #9cadc2;
+  --text-muted: #718096;
+
+  --border: #29323d;
+  --border-light: #374250;
+
+  --accent: #ff6908;
+  --accent-hover: #e85c00;
+  --accent-soft: #351f16;
+  --accent-border: #8b481e;
+
+  --success: #29c875;
+  --success-bg: #102b1d;
+
+  --danger: #ff6b6b;
+  --danger-bg: #2b1719;
+
+  --sidebar-width: 285px;
+}
+
+
+/* =====================================================
+   LIGHT THEME
+===================================================== */
+
+html.light-theme {
+  --page-bg: #f3f6fa;
+  --sidebar-bg: #ffffff;
+
+  --surface: #ffffff;
+  --surface-soft: #f6f8fb;
+  --surface-hover: #eef2f6;
+
+  --text-main: #111827;
+  --text-secondary: #51627a;
+  --text-muted: #78879b;
+
+  --border: #dce3ec;
+  --border-light: #cfd8e4;
+
+  --accent: #ff6908;
+  --accent-hover: #e85c00;
+
+  --accent-soft: #fff0e6;
+  --accent-border: #ff9c61;
+
+  --success: #16894d;
+  --success-bg: #e7f8ef;
+
+  --danger: #dc4343;
+  --danger-bg: #fff0f0;
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--page-bg);
+  color: var(--text-main);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+
+/* =====================================================
+   GLOBAL APP LAYOUT
+===================================================== */
+
+.app-layout,
+.app-shell,
+.app-container,
+.employees-page,
+.certifications-page {
+  min-height: 100vh;
+  background: var(--page-bg) !important;
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   SIDEBAR - SAME FOR EVERY PAGE
+===================================================== */
+
+.sidebar {
+  width: var(--sidebar-width) !important;
+  min-height: 100vh !important;
+
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+
+  padding: 28px 20px !important;
+
+  background: var(--sidebar-bg) !important;
+
+  border-right: 1px solid var(--border) !important;
+
+  color: var(--text-main) !important;
+}
+
+
+/* BRAND */
+
+.brand,
+.logo {
+  padding: 0 10px 24px !important;
+}
+
+.brand-title,
+.logo {
+  color: var(--text-main) !important;
+
+  font-size: 26px !important;
+
+  font-weight: 800 !important;
+}
+
+.brand-subtitle {
+  margin-top: 5px !important;
+
+  color: var(--text-secondary) !important;
+
+  font-size: 11px !important;
+
+  font-weight: 700 !important;
+
+  letter-spacing: 3px !important;
+}
+
+.sidebar-line {
+  height: 1px !important;
+
+  background: var(--border) !important;
+
+  margin-bottom: 27px !important;
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.nav-menu {
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  gap: 8px !important;
+}
+
+.nav-menu a {
+  width: 100% !important;
+
+  display: block !important;
+
+  padding: 16px 17px !important;
+
+  border-radius: 9px !important;
+
+  border: 1px solid transparent !important;
+
+  color: var(--text-secondary) !important;
+
+  text-decoration: none !important;
+
+  font-size: 16px !important;
+
+  font-weight: 600 !important;
+
+  transition: 0.2s ease !important;
+}
+
+.nav-menu a:hover {
+  background: var(--surface-hover) !important;
+
+  color: var(--text-main) !important;
+}
+
+.nav-menu a.active {
+  padding-left: 14px !important;
+
+  background: var(--accent-soft) !important;
+
+  color: var(--text-main) !important;
+
+  border-color: var(--accent-border) !important;
+
+  border-left: 4px solid var(--accent) !important;
+}
+
+
+/* =====================================================
+   MAIN CONTENT
+===================================================== */
+
+.main-content {
+  margin-left: var(--sidebar-width) !important;
+
+  width: calc(100% - var(--sidebar-width)) !important;
+
+  min-height: 100vh !important;
+
+  padding: 38px 45px 60px !important;
+
+  background: var(--page-bg) !important;
+
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   PAGE HEADERS
+===================================================== */
+
+.page-header,
+.topbar {
+  margin-bottom: 30px;
+}
+
+.eyebrow,
+.section-label,
+.orange-label {
+  color: var(--accent) !important;
+
+  font-size: 12px !important;
+
+  font-weight: 800 !important;
+
+  letter-spacing: 2px !important;
+}
+
+.page-header h1,
+.topbar h1 {
+  margin: 0 !important;
+
+  color: var(--text-main) !important;
+
+  font-size: 36px !important;
+
+  font-weight: 800 !important;
+}
+
+.page-header p,
+.topbar p,
+.page-description {
+  color: var(--text-secondary) !important;
+}
+
+
+/* =====================================================
+   TEXT
+===================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-main) !important;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+strong {
+  color: var(--text-main);
+}
+
+small {
+  color: var(--text-muted);
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.stat-card,
+.settings-card,
+.profile-card,
+.course-card,
+skill-card,
+.skill-card,
+.career-card,
+.summary-card,
+.goal-card,
+.panel,
+.employee-card,
+.catalog-card,
+.metric-grid > div {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+
+  border: 1px solid var(--border) !important;
+
+  border-radius: 12px !important;
+
+  box-shadow: none !important;
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.stats-grid .stat,
+.stat {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+
+  border: 1px solid var(--border) !important;
+}
+
+.panel {
+  background: var(--surface) !important;
+}
+
+.panel-head {
+  border-color: var(--border) !important;
+}
+
+.quick-link,
+.person-row,
+.course-row {
+  border-color: var(--border) !important;
+
+  color: var(--text-main) !important;
+}
+
+.quick-link:hover {
+  background: var(--surface-hover) !important;
+}
+
+.profile {
+  background: var(--surface) !important;
+
+  border-color: var(--border) !important;
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+.profile-item {
+  background: var(--surface-soft) !important;
+
+  border: 1px solid var(--border) !important;
+
+  color: var(--text-main) !important;
+}
+
+.profile-item span {
+  color: var(--text-secondary) !important;
+}
+
+.profile-item strong {
+  color: var(--text-main) !important;
+}
+
+.profile-avatar,
+.avatar {
+  background: var(--accent) !important;
+
+  color: white !important;
+}
+
+
+/* =====================================================
+   COURSE CARDS
+===================================================== */
+
+.course-description {
+  color: var(--text-secondary) !important;
+}
+
+.course-details span {
+  color: var(--text-muted) !important;
+}
+
+.course-details strong {
+  color: var(--text-main) !important;
+}
+
+.level-badge {
+  background: var(--accent-soft) !important;
+
+  border: 1px solid var(--accent-border) !important;
+
+  color: var(--accent) !important;
+}
+
+
+/* =====================================================
+   SKILLS
+===================================================== */
+
+.skill-card {
+  background: var(--surface) !important;
+
+  border-color: var(--border) !important;
+}
+
+.skill-card h3 {
+  color: var(--text-main) !important;
+}
+
+.skill-card .description {
+  color: var(--text-secondary) !important;
+}
+
+.category {
+  color: var(--accent) !important;
+}
+
+
+/* =====================================================
+   CAREER
+===================================================== */
+
+.career-description,
+.section-header p,
+.goal-card p {
+  color: var(--text-secondary) !important;
+}
+
+.skill-tags span {
+  background: var(--surface-soft) !important;
+
+  border: 1px solid var(--border-light) !important;
+
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   CERTIFICATIONS TABLE
+===================================================== */
+
+.catalog-card {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--surface-soft) !important;
+}
+
+th {
+  color: var(--text-secondary) !important;
+
+  border-color: var(--border) !important;
+}
+
+td {
+  color: var(--text-main) !important;
+
+  border-color: var(--border) !important;
+}
+
+tbody tr {
+  background: var(--surface) !important;
+
+  border-color: var(--border) !important;
+}
+
+tbody tr:hover {
+  background: var(--surface-hover) !important;
+}
+
+
+/* =====================================================
+   INPUTS
+===================================================== */
+
+input,
+textarea,
+select {
+  background: var(--surface-soft) !important;
+
+  color: var(--text-main) !important;
+
+  border: 1px solid var(--border-light) !important;
+
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent) !important;
+}
+
+select option {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   SEARCH BOXES
+===================================================== */
+
+.search-box,
+.search-section,
+.search,
+.toolbar {
+  background: transparent !important;
+}
+
+.search-box input,
+.search-section input,
+.search input {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+
+  border-color: var(--border) !important;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.add-button,
+.save-button,
+.start-button,
+.primary-button,
+.view-button {
+  background: var(--accent) !important;
+
+  color: white !important;
+
+  border-color: var(--accent) !important;
+}
+
+.add-button:hover,
+.save-button:hover,
+.start-button:hover,
+.primary-button:hover,
+.view-button:hover {
+  background: var(--accent-hover) !important;
+}
+
+.continue-button,
+.edit-button,
+.cancel-button,
+.reset-btn,
+.logout-btn,
+.refresh {
+  background: var(--surface-soft) !important;
+
+  color: var(--text-main) !important;
+
+  border: 1px solid var(--border-light) !important;
+}
+
+.continue-button:hover,
+.edit-button:hover,
+.reset-btn:hover,
+.logout-btn:hover,
+.refresh:hover {
+  border-color: var(--accent) !important;
+}
+
+.delete-button,
+.delete {
+  background: var(--danger-bg) !important;
+
+  color: var(--danger) !important;
+
+  border-color: var(--danger) !important;
+}
+
+
+/* =====================================================
+   PROGRESS
+===================================================== */
+
+.progress-bar,
+.progress-track {
+  background: var(--border) !important;
+}
+
+.progress-fill {
+  background: var(--accent) !important;
+}
+
+.progress-status {
+  color: var(--accent) !important;
+}
+
+.progress-value {
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status,
+.status-badge {
+  background: var(--success-bg) !important;
+
+  color: var(--success) !important;
+}
+
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+.course-form,
+.employee-form,
+.form-card {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+
+  border-color: var(--border) !important;
+}
+
+
+/* =====================================================
+   LIGHT THEME FIXES
+===================================================== */
+
+html.light-theme .sidebar {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+html.light-theme .course-card,
+html.light-theme .skill-card,
+html.light-theme .career-card,
+html.light-theme .settings-card,
+html.light-theme .panel,
+html.light-theme .catalog-card {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04) !important;
+}
+
+
+/* =====================================================
+   DARK THEME FIXES
+===================================================== */
+
+html:not(.light-theme) .course-card,
+html:not(.light-theme) .skill-card,
+html:not(.light-theme) .career-card,
+html:not(.light-theme) .settings-card,
+html:not(.light-theme) .panel,
+html:not(.light-theme) .catalog-card {
+  background: var(--surface) !important;
+
+  color: var(--text-main) !important;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+
+  :root {
+    --sidebar-width: 220px;
+  }
+
+  .main-content {
+    padding: 30px 22px !important;
+  }
+
+}

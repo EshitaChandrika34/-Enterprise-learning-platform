@@ -1,0 +1,2190 @@
+<div class="app-layout">
+
+
+  <!-- ==========================================
+       SIDEBAR
+  =========================================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+        Enterprise Learning
+      </div>
+
+      <div class="brand-subtitle">
+        SKILL & CAREER PLATFORM
+      </div>
+
+    </div>
+
+    <div class="sidebar-line"></div>
+
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+        Dashboard
+      </a>
+
+
+      <a
+        *ngIf="
+          authService.canManageEmployees()
+        "
+        routerLink="/employees"
+        routerLinkActive="active">
+        Employees
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+        Learning
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+        Skills
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+        Certifications
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+        Career
+      </a>
+
+
+      <a
+        *ngIf="
+          authService.canViewAnalytics()
+        "
+        routerLink="/analytics"
+        routerLinkActive="active">
+        Analytics
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+        Settings
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+
+  <!-- ==========================================
+       MAIN
+  =========================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ==================================================
+         EMPLOYEE
+    =================================================== -->
+
+    <ng-container
+      *ngIf="
+        authService.isEmployee()
+      ">
+
+
+      <!-- HEADER -->
+
+      <header class="page-header">
+
+        <div>
+
+          <p class="eyebrow">
+            MY CAREER
+          </p>
+
+          <h1>
+            Career Planning & Development
+          </h1>
+
+          <p class="page-description">
+            Track your career readiness,
+            identify skill gaps,
+            evaluate promotion eligibility
+            and explore internal opportunities.
+          </p>
+
+        </div>
+
+
+        <div
+          class="employee-chip"
+          *ngIf="careerProgress">
+
+          <span class="employee-avatar">
+
+            {{
+              employeeName
+                .charAt(0)
+                .toUpperCase()
+            }}
+
+          </span>
+
+
+          <div>
+
+            <strong>
+              {{ employeeName }}
+            </strong>
+
+            <small>
+
+              {{
+                careerProgress?.department
+                ||
+                authService
+                  .getLoggedInUser()
+                  ?.department
+                ||
+                'Employee'
+              }}
+
+            </small>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+
+      <!-- MESSAGES -->
+
+      <div
+        class="loading-box"
+        *ngIf="loading">
+
+        Loading career information...
+
+      </div>
+
+
+      <div
+        class="error-box"
+        *ngIf="errorMessage">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <div
+        class="success-box"
+        *ngIf="applicationMessage">
+
+        {{ applicationMessage }}
+
+      </div>
+
+
+      <div
+        class="error-box"
+        *ngIf="applicationError">
+
+        {{ applicationError }}
+
+      </div>
+
+
+
+      <ng-container
+        *ngIf="!loading">
+
+
+        <!-- ==========================================
+             SUMMARY
+        =========================================== -->
+
+        <section class="summary-grid">
+
+
+          <article class="summary-card">
+
+            <span>
+              Career Progress
+            </span>
+
+            <strong>
+
+              {{
+                careerProgress
+                  ?.overallProgressPercentage
+                || 0
+              }}%
+
+            </strong>
+
+            <small>
+
+              {{
+                careerProgress
+                  ?.readinessStage
+                ||
+                'EARLY_STAGE'
+              }}
+
+            </small>
+
+          </article>
+
+
+
+          <article class="summary-card">
+
+            <span>
+              Skill Readiness
+            </span>
+
+            <strong>
+
+              {{
+                careerProgress
+                  ?.skillProgressPercentage
+                || 0
+              }}%
+
+            </strong>
+
+            <small>
+
+              {{
+                careerProgress
+                  ?.skillsMatchedCount
+                || 0
+              }}
+
+              /
+
+              {{
+                careerProgress
+                  ?.skillsTotalCount
+                || 0
+              }}
+
+              skills matched
+
+            </small>
+
+          </article>
+
+
+
+          <article class="summary-card">
+
+            <span>
+              Promotion Score
+            </span>
+
+            <strong>
+
+              {{
+                promotionEvaluation
+                  ?.overallScore
+                || 0
+              }}%
+
+            </strong>
+
+            <small
+              [class.success-text]="
+                promotionEvaluation
+                  ?.eligible
+              ">
+
+              {{
+                promotionEvaluation
+                  ?.eligible
+                  ? 'ELIGIBLE'
+                  : 'NOT ELIGIBLE'
+              }}
+
+            </small>
+
+          </article>
+
+
+
+          <article class="summary-card">
+
+            <span>
+              Internal Job Matches
+            </span>
+
+            <strong>
+              {{ matchedJobs.length }}
+            </strong>
+
+            <small>
+              Recommended opportunities
+            </small>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             NEW EMPLOYEE
+        =========================================== -->
+
+        <section
+          class="onboarding-card"
+          *ngIf="
+            !hasCareerStarted
+          ">
+
+
+          <div class="onboarding-content">
+
+            <p class="section-label">
+              GET STARTED
+            </p>
+
+            <h2>
+              Build Your Career Profile
+            </h2>
+
+            <p>
+              Welcome {{ employeeName }}.
+              Your career profile is just getting started.
+              Add your skills and begin learning courses
+              to improve your career readiness,
+              promotion eligibility and internal
+              job recommendations.
+            </p>
+
+          </div>
+
+
+          <div class="onboarding-actions">
+
+            <a
+              routerLink="/skills"
+              class="primary-button">
+
+              Add My Skills
+
+            </a>
+
+
+            <a
+              routerLink="/learning"
+              class="secondary-button">
+
+              Explore Learning
+
+            </a>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             ROADMAP
+        =========================================== -->
+
+        <section
+          class="dashboard-panel"
+          *ngIf="careerProgress">
+
+
+          <div class="panel-heading">
+
+            <div>
+
+              <p class="section-label">
+                CAREER ROADMAP
+              </p>
+
+              <h2>
+                My Career Journey
+              </h2>
+
+            </div>
+
+
+            <span class="status-badge">
+
+              {{
+                careerProgress
+                  ?.readinessStage
+                ||
+                'EARLY_STAGE'
+              }}
+
+            </span>
+
+          </div>
+
+
+
+          <div class="roadmap">
+
+
+            <div class="roadmap-role">
+
+              <span class="roadmap-caption">
+                CURRENT PROFILE
+              </span>
+
+              <strong>
+                {{ employeeName }}
+              </strong>
+
+              <small>
+
+                {{
+                  careerProgress
+                    ?.department
+                  ||
+                  '-'
+                }}
+
+              </small>
+
+            </div>
+
+
+
+            <div class="roadmap-arrow">
+
+              <div class="arrow-line">
+              </div>
+
+              <b>
+                →
+              </b>
+
+            </div>
+
+
+
+            <div
+              class="roadmap-role target">
+
+              <span class="roadmap-caption">
+                TARGET ROLE
+              </span>
+
+              <strong>
+
+                {{
+                  careerProgress
+                    ?.targetRole
+                  ||
+                  'Not Set'
+                }}
+
+              </strong>
+
+              <small>
+                Career Goal
+              </small>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="progress-area">
+
+            <div class="progress-heading">
+
+              <span>
+                Overall Career Readiness
+              </span>
+
+              <strong>
+
+                {{
+                  careerProgress
+                    ?.overallProgressPercentage
+                  || 0
+                }}%
+
+              </strong>
+
+            </div>
+
+
+            <div class="progress-track">
+
+              <div
+                class="progress-fill"
+                [style.width.%]="
+                  careerProgress
+                    ?.overallProgressPercentage
+                  || 0
+                ">
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="roadmap-details">
+
+
+            <div>
+
+              <span>
+                Skill Progress
+              </span>
+
+              <strong>
+
+                {{
+                  careerProgress
+                    ?.skillProgressPercentage
+                  || 0
+                }}%
+
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Skills Matched
+              </span>
+
+              <strong>
+
+                {{
+                  careerProgress
+                    ?.skillsMatchedCount
+                  || 0
+                }}
+
+                /
+
+                {{
+                  careerProgress
+                    ?.skillsTotalCount
+                  || 0
+                }}
+
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Goal Status
+              </span>
+
+              <strong>
+                {{ goalStatus }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Target Date
+              </span>
+
+              <strong>
+                {{ targetDate }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             SKILL GAP + LEARNING
+        =========================================== -->
+
+        <section
+          class="two-column-section"
+          *ngIf="recommendations">
+
+
+          <!-- SKILLS -->
+
+          <article class="dashboard-panel">
+
+            <div class="panel-heading">
+
+              <div>
+
+                <p class="section-label">
+                  SKILL GAP ANALYSIS
+                </p>
+
+                <h2>
+                  Skills Readiness
+                </h2>
+
+              </div>
+
+
+              <span class="percentage-badge">
+
+                {{
+                  recommendations
+                    ?.matchPercentage
+                  || 0
+                }}%
+
+              </span>
+
+            </div>
+
+
+            <h4 class="mini-heading">
+              Current Skills
+            </h4>
+
+
+            <div class="tag-container">
+
+              <span
+                class="skill-tag available"
+                *ngFor="
+                  let skill
+                  of recommendations
+                    ?.currentSkills
+                ">
+
+                ✓ {{ skill }}
+
+              </span>
+
+            </div>
+
+
+            <div
+              class="empty-message"
+              *ngIf="
+                !recommendations?.currentSkills
+                ||
+                recommendations
+                  .currentSkills
+                  .length === 0
+              ">
+
+              No skills added yet.
+
+              <br>
+
+              Add skills from the Skills page.
+
+            </div>
+
+
+
+            <h4 class="mini-heading">
+              Missing Skills
+            </h4>
+
+
+            <div class="tag-container">
+
+              <span
+                class="skill-tag missing"
+                *ngFor="
+                  let skill
+                  of recommendations
+                    ?.missingSkills
+                ">
+
+                {{ skill }}
+
+              </span>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- LEARNING -->
+
+          <article class="dashboard-panel">
+
+            <div class="panel-heading">
+
+              <div>
+
+                <p class="section-label">
+                  TRAINING RECOMMENDATIONS
+                </p>
+
+                <h2>
+                  Recommended Learning
+                </h2>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="recommendation-item"
+              *ngFor="
+                let course
+                of recommendations
+                  ?.suggestedCourses
+              ">
+
+              <div class="recommendation-icon">
+                ✓
+              </div>
+
+
+              <div>
+
+                <strong>
+                  {{ course }}
+                </strong>
+
+                <small>
+                  Recommended for your target role
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="empty-message"
+              *ngIf="
+                !recommendations?.suggestedCourses
+                ||
+                recommendations
+                  .suggestedCourses
+                  .length === 0
+              ">
+
+              No learning recommendations yet.
+
+            </div>
+
+
+            <a
+              routerLink="/learning"
+              class="primary-button">
+
+              View Learning Courses
+
+            </a>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             PROMOTION + MATCHED JOBS
+        =========================================== -->
+
+        <section class="two-column-section">
+
+
+          <!-- PROMOTION -->
+
+          <article
+            class="dashboard-panel"
+            *ngIf="promotionEvaluation">
+
+
+            <div class="panel-heading">
+
+              <div>
+
+                <p class="section-label">
+                  PROMOTION READINESS
+                </p>
+
+                <h2>
+                  Promotion Evaluation
+                </h2>
+
+              </div>
+
+
+              <span
+                class="eligibility-badge"
+                [class.eligible]="
+                  promotionEvaluation
+                    ?.eligible
+                ">
+
+                {{
+                  promotionEvaluation
+                    ?.eligible
+                    ? 'ELIGIBLE'
+                    : 'NOT ELIGIBLE'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <div class="promotion-role">
+
+              <span>
+                Target Role
+              </span>
+
+              <strong>
+
+                {{
+                  promotionEvaluation
+                    ?.targetRole
+                  ||
+                  'Not Set'
+                }}
+
+              </strong>
+
+            </div>
+
+
+            <div class="score-row">
+
+              <span>
+                Overall Score
+              </span>
+
+              <strong>
+
+                {{
+                  promotionEvaluation
+                    ?.overallScore
+                  || 0
+                }}%
+
+              </strong>
+
+            </div>
+
+
+            <div class="score-row">
+
+              <span>
+                Minimum Required
+              </span>
+
+              <strong>
+
+                {{
+                  promotionEvaluation
+                    ?.minimumRequiredScore
+                  || 0
+                }}%
+
+              </strong>
+
+            </div>
+
+
+            <div class="score-row">
+
+              <span>
+                Skills Requirement
+              </span>
+
+              <strong>
+
+                {{
+                  promotionEvaluation
+                    ?.skillsSatisfied
+                    ? 'Satisfied'
+                    : 'Pending'
+                }}
+
+              </strong>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- MATCHED JOBS -->
+
+          <article class="dashboard-panel">
+
+            <div class="panel-heading">
+
+              <div>
+
+                <p class="section-label">
+                  INTERNAL JOB MATCHING
+                </p>
+
+                <h2>
+                  Recommended Opportunities
+                </h2>
+
+              </div>
+
+            </div>
+
+
+
+            <div
+              class="job-match-card"
+              *ngFor="
+                let match
+                of matchedJobs
+              ">
+
+
+              <div class="job-top">
+
+                <div>
+
+                  <h3>
+                    {{ match.jobTitle }}
+                  </h3>
+
+                  <p>
+
+                    {{ match.jobDepartment }}
+
+                    ·
+
+                    {{ match.jobLocation }}
+
+                  </p>
+
+                </div>
+
+
+                <div class="match-circle">
+
+                  {{
+                    match.overallMatchScore
+                    || 0
+                  }}%
+
+                </div>
+
+              </div>
+
+
+
+              <div class="job-meta">
+
+                <span>
+
+                  Compatibility
+
+                  <strong>
+
+                    {{
+                      match.compatibilityLevel
+                      ||
+                      match.compatibility
+                      ||
+                      '-'
+                    }}
+
+                  </strong>
+
+                </span>
+
+
+                <span>
+
+                  Skill Score
+
+                  <strong>
+
+                    {{
+                      match.skillScore
+                      ||
+                      match.skillsScore
+                      ||
+                      0
+                    }}%
+
+                  </strong>
+
+                </span>
+
+
+                <span>
+
+                  Experience
+
+                  <strong>
+
+                    {{
+                      match.experienceScore
+                      || 0
+                    }}%
+
+                  </strong>
+
+                </span>
+
+              </div>
+
+
+
+              <!-- ALREADY APPLIED -->
+
+              <span
+                *ngIf="
+                  isApplied(
+                    match.jobId
+                  )
+                "
+                class="eligibility-badge eligible">
+
+                {{
+                  getApplicationStatus(
+                    match.jobId
+                  )
+                }}
+
+              </span>
+
+
+
+              <!-- APPLY BUTTON -->
+
+              <button
+                *ngIf="
+                  !isApplied(
+                    match.jobId
+                  )
+                "
+                class="primary-button"
+                type="button"
+                [disabled]="
+                  applyingJobId
+                    ===
+                  match.jobId
+                  ||
+                  !canApplyForJob(match)
+                "
+                (click)="
+                  applyForJob(match)
+                ">
+
+                {{
+                  applyingJobId
+                    ===
+                  match.jobId
+
+                    ? 'Applying...'
+
+                    : (
+                        canApplyForJob(match)
+                          ? 'Apply for Job'
+                          : 'Complete Profile to Apply'
+                      )
+                }}
+
+              </button>
+
+
+
+              <p
+                class="job-requirement"
+                *ngIf="
+                  !isApplied(
+                    match.jobId
+                  )
+                  &&
+                  !canApplyForJob(match)
+                ">
+
+                {{
+                  applicationRequirementMessage
+                }}
+
+              </p>
+
+            </div>
+
+
+
+            <div
+              class="empty-message"
+              *ngIf="
+                matchedJobs.length === 0
+              ">
+
+              No matching internal jobs found.
+
+            </div>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             MY APPLICATIONS
+        =========================================== -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              MY APPLICATIONS
+            </p>
+
+            <h2>
+              Job Application Status
+            </h2>
+
+            <p>
+              Track your internal job applications.
+            </p>
+
+          </div>
+
+
+          <div class="jobs-grid">
+
+            <article
+              class="job-card"
+              *ngFor="
+                let application
+                of myApplications
+              ">
+
+
+              <div class="job-card-header">
+
+                <div>
+
+                  <h3>
+
+                    {{
+                      application.jobTitle
+                      ||
+                      'Internal Opportunity'
+                    }}
+
+                  </h3>
+
+                  <p>
+                    {{
+                      application.jobDepartment
+                      ||
+                      '-'
+                    }}
+                  </p>
+
+                </div>
+
+
+                <span class="open-badge">
+
+                  {{
+                    application.status
+                  }}
+
+                </span>
+
+              </div>
+
+
+              <div class="job-info">
+
+                <span>
+
+                  Applied:
+
+                  <strong>
+
+                    {{
+                      application.appliedDate
+                      ||
+                      '-'
+                    }}
+
+                  </strong>
+
+                </span>
+
+
+                <span>
+
+                  Match:
+
+                  <strong>
+
+                    {{
+                      application.matchScore
+                      || 0
+                    }}%
+
+                  </strong>
+
+                </span>
+
+              </div>
+
+
+              <button
+                *ngIf="
+                  application.status
+                    ===
+                  'APPLIED'
+                "
+                class="withdraw-button"
+                type="button"
+                (click)="
+                  withdrawApplication(
+                    application
+                  )
+                ">
+
+                Withdraw Application
+
+              </button>
+
+            </article>
+
+          </div>
+
+
+          <div
+            class="empty-message"
+            *ngIf="
+              myApplications.length === 0
+            ">
+
+            You have not applied for any jobs yet.
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             CAREER PATHS
+        =========================================== -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              CAREER PATHS
+            </p>
+
+            <h2>
+              Explore Career Opportunities
+            </h2>
+
+            <p>
+              Compare available career paths
+              and required competencies.
+            </p>
+
+          </div>
+
+
+          <div class="career-path-grid">
+
+            <article
+              class="path-card"
+              *ngFor="
+                let path
+                of careerPaths
+              ">
+
+
+              <div class="path-top">
+
+                <div>
+
+                  <span class="department-badge">
+
+                    {{
+                      path.department
+                    }}
+
+                  </span>
+
+                  <h3>
+                    {{ path.title }}
+                  </h3>
+
+                  <p class="target-role">
+
+                    Target:
+
+                    {{ path.targetRole }}
+
+                  </p>
+
+                </div>
+
+
+                <span class="experience-box">
+
+                  {{
+                    path.minExperienceYears
+                    || 0
+                  }}+ yrs
+
+                </span>
+
+              </div>
+
+
+              <p class="path-description">
+
+                {{
+                  path.description
+                }}
+
+              </p>
+
+
+              <h4>
+                Required Skills
+              </h4>
+
+
+              <div class="tag-container">
+
+                <span
+                  class="skill-tag"
+                  *ngFor="
+                    let skill
+                    of path.requiredSkillList
+                  ">
+
+                  {{ skill }}
+
+                </span>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ==========================================
+             OPEN JOBS
+        =========================================== -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              INTERNAL JOB PORTAL
+            </p>
+
+            <h2>
+              Open Opportunities
+            </h2>
+
+            <p>
+              Explore internal roles available
+              within the organization.
+            </p>
+
+          </div>
+
+
+          <div class="jobs-grid">
+
+            <article
+              class="job-card"
+              *ngFor="
+                let job
+                of jobs
+              ">
+
+
+              <div class="job-card-header">
+
+                <div>
+
+                  <h3>
+                    {{ job.title }}
+                  </h3>
+
+                  <p>
+
+                    {{ job.department }}
+
+                    ·
+
+                    {{ job.location }}
+
+                  </p>
+
+                </div>
+
+
+                <span class="open-badge">
+
+                  {{
+                    job.status
+                  }}
+
+                </span>
+
+              </div>
+
+
+              <p class="job-description">
+
+                {{
+                  job.description
+                }}
+
+              </p>
+
+
+              <div class="job-info">
+
+                <span>
+
+                  Experience:
+
+                  <strong>
+
+                    {{
+                      job.minExperienceYears
+                      || 0
+                    }}+ years
+
+                  </strong>
+
+                </span>
+
+
+                <span>
+
+                  Type:
+
+                  <strong>
+
+                    {{
+                      job.employmentType
+                    }}
+
+                  </strong>
+
+                </span>
+
+              </div>
+
+
+              <h4>
+                Required Skills
+              </h4>
+
+
+              <p class="required-skills">
+
+                {{
+                  job.requiredSkills
+                }}
+
+              </p>
+
+
+
+              <span
+                *ngIf="
+                  isApplied(job.id)
+                "
+                class="eligibility-badge eligible">
+
+                {{
+                  getApplicationStatus(
+                    job.id
+                  )
+                }}
+
+              </span>
+
+
+
+              <button
+                *ngIf="
+                  !isApplied(job.id)
+                "
+                class="primary-button"
+                type="button"
+                [disabled]="
+                  applyingJobId === job.id
+                  ||
+                  !canApplyForJob(job)
+                "
+                (click)="
+                  applyForJob(job)
+                ">
+
+                {{
+                  applyingJobId === job.id
+
+                    ? 'Applying...'
+
+                    : (
+                        canApplyForJob(job)
+                          ? 'Apply for Job'
+                          : 'Complete Profile to Apply'
+                      )
+                }}
+
+              </button>
+
+
+              <p
+                class="job-requirement"
+                *ngIf="
+                  !isApplied(job.id)
+                  &&
+                  !canApplyForJob(job)
+                ">
+
+                {{
+                  applicationRequirementMessage
+                }}
+
+              </p>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+      </ng-container>
+
+    </ng-container>
+
+
+
+    <!-- ==================================================
+         ADMIN / HR
+    =================================================== -->
+
+    <ng-container
+      *ngIf="
+        authService.isAdmin()
+        ||
+        authService.isHR()
+      ">
+
+
+      <header class="page-header">
+
+        <div>
+
+          <p class="eyebrow">
+
+            {{
+              authService.isAdmin()
+                ? 'ADMIN CAREER MANAGEMENT'
+                : 'HR CAREER MANAGEMENT'
+            }}
+
+          </p>
+
+          <h1>
+            Career & Workforce Development
+          </h1>
+
+          <p class="page-description">
+            Manage career pathways,
+            promotion criteria,
+            internal opportunities
+            and workforce development.
+          </p>
+
+        </div>
+
+      </header>
+
+
+      <div
+        class="loading-box"
+        *ngIf="loading">
+
+        Loading career management...
+
+      </div>
+
+
+      <div
+        class="error-box"
+        *ngIf="errorMessage">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+
+      <ng-container
+        *ngIf="!loading">
+
+
+        <!-- SUMMARY -->
+
+        <section class="summary-grid">
+
+          <article class="summary-card">
+
+            <span>
+              Career Paths
+            </span>
+
+            <strong>
+              {{ totalCareerPaths }}
+            </strong>
+
+            <small>
+              Available pathways
+            </small>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span>
+              Promotion Criteria
+            </span>
+
+            <strong>
+              {{ totalPromotionCriteria }}
+            </strong>
+
+            <small>
+              Defined criteria
+            </small>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span>
+              Open Jobs
+            </span>
+
+            <strong>
+              {{ totalOpenJobs }}
+            </strong>
+
+            <small>
+              Internal opportunities
+            </small>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span>
+              Training Courses
+            </span>
+
+            <strong>
+              {{ totalTrainingCourses }}
+            </strong>
+
+            <small>
+              Development programs
+            </small>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- TRAINING -->
+
+        <section
+          class="dashboard-panel"
+          *ngIf="trainingAnalytics">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <p class="section-label">
+                WORKFORCE DEVELOPMENT
+              </p>
+
+              <h2>
+                Training Effectiveness
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="management-grid">
+
+            <div class="management-item">
+
+              <span>
+                Total Enrollments
+              </span>
+
+              <strong>
+                {{ totalEnrollments }}
+              </strong>
+
+            </div>
+
+
+            <div class="management-item">
+
+              <span>
+                Completion Rate
+              </span>
+
+              <strong>
+                {{ completionRate }}%
+              </strong>
+
+            </div>
+
+
+            <div class="management-item">
+
+              <span>
+                Average Progress
+              </span>
+
+              <strong>
+                {{ averageProgress }}%
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- PROMOTION CRITERIA -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              PROMOTION MANAGEMENT
+            </p>
+
+            <h2>
+              Promotion Criteria
+            </h2>
+
+            <p>
+              Criteria used to evaluate
+              employee promotion readiness.
+            </p>
+
+          </div>
+
+
+          <div class="career-path-grid">
+
+            <article
+              class="path-card"
+              *ngFor="
+                let criteria
+                of promotionCriteria
+              ">
+
+              <span class="department-badge">
+                PROMOTION
+              </span>
+
+
+              <h3>
+
+                {{
+                  criteria.targetRole
+                  ||
+                  criteria.role
+                  ||
+                  'Promotion Criteria'
+                }}
+
+              </h3>
+
+
+              <div class="score-row">
+
+                <span>
+                  Minimum Score
+                </span>
+
+                <strong>
+
+                  {{
+                    criteria.minimumRequiredScore
+                    ||
+                    criteria.minimumScore
+                    ||
+                    0
+                  }}%
+
+                </strong>
+
+              </div>
+
+
+              <div
+                class="score-row"
+                *ngIf="
+                  criteria.minimumExperienceYears
+                  != null
+                ">
+
+                <span>
+                  Experience Required
+                </span>
+
+                <strong>
+
+                  {{
+                    criteria.minimumExperienceYears
+                  }} years
+
+                </strong>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- CAREER PATHS -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              CAREER PATH MANAGEMENT
+            </p>
+
+            <h2>
+              Available Career Paths
+            </h2>
+
+            <p>
+              Review organizational career
+              development pathways.
+            </p>
+
+          </div>
+
+
+          <div class="career-path-grid">
+
+            <article
+              class="path-card"
+              *ngFor="
+                let path
+                of careerPaths
+              ">
+
+              <div class="path-top">
+
+                <div>
+
+                  <span class="department-badge">
+
+                    {{
+                      path.department
+                    }}
+
+                  </span>
+
+                  <h3>
+                    {{ path.title }}
+                  </h3>
+
+                  <p class="target-role">
+
+                    Target:
+
+                    {{ path.targetRole }}
+
+                  </p>
+
+                </div>
+
+
+                <span class="experience-box">
+
+                  {{
+                    path.minExperienceYears
+                    || 0
+                  }}+ yrs
+
+                </span>
+
+              </div>
+
+
+              <p class="path-description">
+
+                {{
+                  path.description
+                }}
+
+              </p>
+
+
+              <h4>
+                Required Skills
+              </h4>
+
+
+              <div class="tag-container">
+
+                <span
+                  class="skill-tag"
+                  *ngFor="
+                    let skill
+                    of path.requiredSkillList
+                  ">
+
+                  {{ skill }}
+
+                </span>
+
+              </div>
+
+
+              <h4>
+                Recommended Courses
+              </h4>
+
+
+              <div class="course-list">
+
+                <span
+                  *ngFor="
+                    let course
+                    of path.recommendedCourseList
+                  ">
+
+                  {{ course }}
+
+                </span>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- JOB POSTINGS -->
+
+        <section class="section">
+
+          <div class="section-header">
+
+            <p class="section-label">
+              INTERNAL OPPORTUNITIES
+            </p>
+
+            <h2>
+              Job Postings
+            </h2>
+
+            <p>
+              Review open internal career
+              opportunities available to employees.
+            </p>
+
+          </div>
+
+
+          <div class="jobs-grid">
+
+            <article
+              class="job-card"
+              *ngFor="
+                let job
+                of jobs
+              ">
+
+              <div class="job-card-header">
+
+                <div>
+
+                  <h3>
+                    {{ job.title }}
+                  </h3>
+
+                  <p>
+
+                    {{ job.department }}
+
+                    ·
+
+                    {{ job.location }}
+
+                  </p>
+
+                </div>
+
+
+                <span class="open-badge">
+
+                  {{
+                    job.status
+                  }}
+
+                </span>
+
+              </div>
+
+
+              <p class="job-description">
+
+                {{
+                  job.description
+                }}
+
+              </p>
+
+
+              <div class="job-info">
+
+                <span>
+
+                  Experience:
+
+                  <strong>
+
+                    {{
+                      job.minExperienceYears
+                      || 0
+                    }}+ years
+
+                  </strong>
+
+                </span>
+
+
+                <span>
+
+                  Type:
+
+                  <strong>
+                    {{ job.employmentType }}
+                  </strong>
+
+                </span>
+
+              </div>
+
+
+              <h4>
+                Required Skills
+              </h4>
+
+
+              <p class="required-skills">
+
+                {{
+                  job.requiredSkills
+                }}
+
+              </p>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+      </ng-container>
+
+    </ng-container>
+
+
+  </main>
+
+</div>

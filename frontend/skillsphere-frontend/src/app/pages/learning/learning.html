@@ -1,0 +1,701 @@
+<div class="app-layout">
+
+  <!-- ============================= -->
+  <!-- SIDEBAR -->
+  <!-- ============================= -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+  Enterprise Learning
+</div>
+
+<div class="brand-subtitle">
+  SKILL & CAREER PLATFORM
+</div>
+
+    </div>
+
+    <div class="sidebar-line"></div>
+
+
+    <nav class="nav-menu">
+
+  <a
+    routerLink="/dashboard"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Dashboard
+  </a>
+
+
+  <a
+    *ngIf="authService.canManageEmployees()"
+    routerLink="/employees"
+    routerLinkActive="active">
+    Employees
+  </a>
+
+
+  <a
+    routerLink="/learning"
+    routerLinkActive="active">
+    Learning
+  </a>
+
+
+  <a
+    routerLink="/skills"
+    routerLinkActive="active">
+    Skills
+  </a>
+
+
+  <a
+    routerLink="/certifications"
+    routerLinkActive="active">
+    Certifications
+  </a>
+
+
+  <a
+    routerLink="/career"
+    routerLinkActive="active">
+    Career
+  </a>
+
+
+  <a
+    *ngIf="authService.canViewAnalytics()"
+    routerLink="/analytics"
+    routerLinkActive="active">
+    Analytics
+  </a>
+
+
+  <a
+    routerLink="/settings"
+    routerLinkActive="active">
+    Settings
+  </a>
+
+</nav>
+  </aside>
+
+
+  <!-- ============================= -->
+  <!-- MAIN -->
+  <!-- ============================= -->
+
+  <main class="main-content">
+
+
+    <!-- HEADER -->
+
+    <header class="page-header">
+
+      <div>
+
+        <p class="eyebrow">
+          LEARNING CENTER
+        </p>
+
+
+        <h1>
+          {{
+            authService.isEmployee()
+              ? 'My Learning'
+              : 'Learning Management'
+          }}
+        </h1>
+
+
+        <p class="page-description">
+
+          {{
+            authService.isEmployee()
+              ? 'Choose a course, start learning, track progress and earn certificates.'
+              : 'Manage learning courses and employee development.'
+          }}
+
+        </p>
+
+      </div>
+
+
+      <button
+        *ngIf="authService.canManageLearning()"
+        class="primary-button"
+        type="button"
+        (click)="openAddForm()">
+
+        Add Course
+
+      </button>
+
+    </header>
+
+
+    <!-- ============================= -->
+    <!-- STATS -->
+    <!-- ============================= -->
+
+    <section class="stats-grid">
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          Total Courses
+        </span>
+
+        <strong>
+          {{ totalCourses }}
+        </strong>
+
+        <small>
+          Available learning courses
+        </small>
+
+      </article>
+
+
+      <article
+        class="stat-card"
+        *ngIf="authService.isEmployee()">
+
+        <span class="stat-label">
+          My Courses
+        </span>
+
+        <strong>
+          {{ myCoursesCount }}
+        </strong>
+
+        <small>
+          Courses currently enrolled
+        </small>
+
+      </article>
+
+    </section>
+
+
+    <!-- ============================= -->
+    <!-- CERTIFICATE MESSAGES -->
+    <!-- ============================= -->
+
+    <div
+      class="certificate-success"
+      *ngIf="certificateMessage">
+
+      {{ certificateMessage }}
+
+    </div>
+
+
+    <div
+      class="certificate-error"
+      *ngIf="certificateError">
+
+      {{ certificateError }}
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- SEARCH -->
+    <!-- ============================= -->
+
+    <section class="search-section">
+
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+        placeholder="Search courses by name, trainer or level">
+
+    </section>
+
+
+    <!-- LOADING -->
+
+    <div
+      class="message"
+      *ngIf="loading">
+
+      Loading courses...
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- COURSES -->
+    <!-- ============================= -->
+
+    <section
+      class="course-grid"
+      *ngIf="!loading">
+
+
+      <article
+        class="course-card"
+        *ngFor="let course of filteredCourses">
+
+
+        <div class="course-top">
+
+          <div>
+
+            <h2>
+              {{ course.courseName }}
+            </h2>
+
+
+            <span class="level-badge">
+              {{ course.level }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <p class="course-description">
+
+          {{ course.description }}
+
+        </p>
+
+
+        <div class="course-details">
+
+          <div>
+
+            <span>
+              Trainer
+            </span>
+
+            <strong>
+              {{ course.trainerName }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Duration
+            </span>
+
+            <strong>
+              {{ course.duration }} Hours
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- EMPLOYEE -->
+        <!-- ============================= -->
+
+        <div
+          *ngIf="authService.isEmployee()">
+
+
+          <!-- NOT ENROLLED -->
+
+          <button
+            *ngIf="!isEnrolled(course.courseId)"
+            class="start-button"
+            type="button"
+            (click)="startCourse(course)">
+
+            Start Course
+
+          </button>
+
+
+          <!-- ENROLLED -->
+
+          <div
+            class="progress-section"
+            *ngIf="isEnrolled(course.courseId)">
+
+
+            <div class="progress-header">
+
+              <span class="progress-status">
+
+                {{
+                  getProgressStatus(
+                    course.courseId
+                  )
+                }}
+
+              </span>
+
+
+              <span class="progress-value">
+
+                {{
+                  getProgress(
+                    course.courseId
+                  )
+                }}%
+
+              </span>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+              <div
+                class="progress-fill"
+                [style.width.%]="
+                  getProgress(
+                    course.courseId
+                  )
+                ">
+              </div>
+
+            </div>
+
+
+            <!-- CONTINUE COURSE -->
+
+            <button
+              *ngIf="
+                getProgress(course.courseId) < 100
+              "
+              class="continue-button"
+              type="button"
+              (click)="continueCourse(course)">
+
+              Continue Course
+
+            </button>
+
+
+            <button
+              *ngIf="
+                getProgress(course.courseId) >= 100
+              "
+              class="completed-button"
+              type="button"
+              disabled>
+
+              Course Completed
+
+            </button>
+
+
+            <!-- ============================= -->
+            <!-- CERTIFICATE SECTION -->
+            <!-- ============================= -->
+
+            <div class="certificate-section">
+
+
+              <!-- ALREADY GENERATED -->
+
+              <div
+                class="certificate-issued"
+                *ngIf="
+                  hasCertificate(
+                    course.courseId
+                  )
+                ">
+
+                <span class="certificate-label">
+                  Certificate Issued
+                </span>
+
+
+                <strong>
+
+                  {{
+                    getCertificateNumber(
+                      course.courseId
+                    )
+                  }}
+
+                </strong>
+
+
+                <a
+                  routerLink="/certifications"
+                  class="certificate-view-button">
+
+                  View Certificate
+
+                </a>
+
+              </div>
+
+
+              <!-- BELOW 80 -->
+
+              <div
+                class="certificate-locked"
+                *ngIf="
+                  !hasCertificate(course.courseId)
+                  &&
+                  getProgress(course.courseId) < 80
+                ">
+
+                <strong>
+                  Certificate Locked
+                </strong>
+
+                <span>
+
+                  Complete
+                  {{
+                    remainingForCertificate(
+                      course.courseId
+                    )
+                  }}%
+                  more to unlock your certificate.
+
+                </span>
+
+              </div>
+
+
+              <!-- 80 OR ABOVE -->
+
+              <button
+                *ngIf="
+                  canGenerateCertificate(
+                    course.courseId
+                  )
+                "
+                class="certificate-generate-button"
+                type="button"
+                (click)="generateCertificate(course)">
+
+                Generate Certificate
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- ADMIN / HR -->
+        <!-- ============================= -->
+
+        <div
+          class="management-actions"
+          *ngIf="
+            authService.canManageLearning()
+          ">
+
+
+          <button
+            class="edit-button"
+            type="button"
+            (click)="editCourse(course)">
+
+            Edit
+
+          </button>
+
+
+          <button
+            *ngIf="course.courseId"
+            class="delete-button"
+            type="button"
+            (click)="
+              deleteCourse(
+                course.courseId!
+              )
+            ">
+
+            Delete
+
+          </button>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- NO COURSES -->
+
+    <div
+      class="empty-state"
+      *ngIf="
+        !loading
+        &&
+        filteredCourses.length === 0
+      ">
+
+      <h3>
+        No courses found
+      </h3>
+
+      <p>
+        Try another search.
+      </p>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- ============================= -->
+<!-- ADD / EDIT COURSE MODAL -->
+<!-- ============================= -->
+
+<div
+  class="modal-background"
+  *ngIf="showForm">
+
+
+  <div class="course-form">
+
+
+    <div class="form-header">
+
+      <div>
+
+        <p class="eyebrow">
+          COURSE MANAGEMENT
+        </p>
+
+        <h2>
+
+          {{
+            isEditing
+              ? 'Edit Course'
+              : 'Add Course'
+          }}
+
+        </h2>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeForm()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <label>
+      Course Name
+    </label>
+
+    <input
+      type="text"
+      [(ngModel)]="course.courseName"
+      placeholder="Enter course name">
+
+
+    <label>
+      Description
+    </label>
+
+    <textarea
+      [(ngModel)]="course.description"
+      placeholder="Enter course description">
+    </textarea>
+
+
+    <label>
+      Trainer Name
+    </label>
+
+    <input
+      type="text"
+      [(ngModel)]="course.trainerName"
+      placeholder="Enter trainer name">
+
+
+    <label>
+      Duration
+    </label>
+
+    <input
+      type="number"
+      [(ngModel)]="course.duration"
+      placeholder="Duration in hours">
+
+
+    <label>
+      Level
+    </label>
+
+    <select
+      [(ngModel)]="course.level">
+
+      <option value="">
+        Select level
+      </option>
+
+      <option value="Beginner">
+        Beginner
+      </option>
+
+      <option value="Intermediate">
+        Intermediate
+      </option>
+
+      <option value="Advanced">
+        Advanced
+      </option>
+
+    </select>
+
+
+    <div class="form-actions">
+
+
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="closeForm()">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="saveCourse()">
+
+        {{
+          isEditing
+            ? 'Update Course'
+            : 'Save Course'
+        }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

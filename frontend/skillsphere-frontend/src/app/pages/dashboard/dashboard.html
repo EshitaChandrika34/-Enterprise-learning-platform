@@ -1,0 +1,1025 @@
+<div class="app-shell">
+
+  <!-- =========================================
+       SIDEBAR
+  ========================================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+    <div class="brand-title">
+  Enterprise Learning
+</div>
+
+<div class="brand-subtitle">
+  SKILL & CAREER PLATFORM
+</div>
+
+  </div>
+<div class="sidebar-line"></div>
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+
+
+      <a
+        *ngIf="authService.canViewEmployees()"
+        routerLink="/employees"
+        routerLinkActive="active">
+        Employees
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+        Learning
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+        Skills
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+        Certifications
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+        Career
+      </a>
+
+
+      <a
+        *ngIf="authService.canViewAnalytics()"
+        routerLink="/analytics"
+        routerLinkActive="active">
+        Analytics
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+        Settings
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- =========================================
+       MAIN CONTENT
+  ========================================== -->
+
+  <main class="main-content">
+
+
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <header class="topbar">
+
+      <div>
+
+        <p
+          class="eyebrow"
+          *ngIf="authService.isEmployee()">
+          MY LEARNING WORKSPACE
+        </p>
+
+        <p
+          class="eyebrow"
+          *ngIf="authService.isHR()">
+          HR WORKSPACE
+        </p>
+
+        <p
+          class="eyebrow"
+          *ngIf="authService.isAdmin()">
+          ADMIN WORKSPACE
+        </p>
+
+
+        <h1 *ngIf="authService.isEmployee()">
+          Dashboard Overview
+        </h1>
+
+        <h1 *ngIf="authService.isHR()">
+          HR Dashboard
+        </h1>
+
+        <h1 *ngIf="authService.isAdmin()">
+          Admin Dashboard
+        </h1>
+
+
+        <p *ngIf="authService.isEmployee()">
+          View your learning, skills and certifications.
+        </p>
+
+        <p *ngIf="authService.isHR()">
+          Monitor employees, learning and workforce development.
+        </p>
+
+        <p *ngIf="authService.isAdmin()">
+          Manage employees, learning, skills and certifications.
+        </p>
+
+      </div>
+
+
+      <!-- USER PROFILE -->
+
+      <div
+        class="profile"
+        *ngIf="loggedInUser">
+
+        <div class="avatar">
+          {{ initials() }}
+        </div>
+
+        <div>
+
+          <strong>
+            {{ loggedInUser.firstName }}
+            {{ loggedInUser.lastName }}
+          </strong>
+
+          <small>
+            {{ authService.getRoleLabel() }}
+          </small>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================================
+         ADMIN / HR STATISTICS
+    ========================================== -->
+
+    <section
+      class="stats-grid"
+      *ngIf="authService.isAdmin() || authService.isHR()">
+
+
+      <!-- EMPLOYEES -->
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          E
+        </span>
+
+        <div>
+
+          <small>
+            Total Employees
+          </small>
+
+          <strong>
+            {{
+              employeesLoading
+                ? '...'
+                : totalEmployees
+            }}
+          </strong>
+
+          <em>
+            Registered employees
+          </em>
+
+        </div>
+
+      </article>
+
+
+      <!-- COURSES -->
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          L
+        </span>
+
+        <div>
+
+          <small>
+            Learning Courses
+          </small>
+
+          <strong>
+            {{
+              coursesLoading
+                ? '...'
+                : totalCourses
+            }}
+          </strong>
+
+          <em>
+            Learning Service
+          </em>
+
+        </div>
+
+      </article>
+
+
+      <!-- SKILLS -->
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          S
+        </span>
+
+        <div>
+
+          <small>
+            Skills
+          </small>
+
+          <strong>
+            {{
+              skillsLoading
+                ? '...'
+                : totalSkills
+            }}
+          </strong>
+
+          <em>
+            Skill Service
+          </em>
+
+        </div>
+
+      </article>
+
+
+      <!-- CERTIFICATES -->
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          C
+        </span>
+
+        <div>
+
+          <small>
+            Certificates
+          </small>
+
+          <strong>
+            {{
+              certificationsLoading
+                ? '...'
+                : totalCertificates
+            }}
+          </strong>
+
+          <em>
+            Issued credentials
+          </em>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================================
+         EMPLOYEE STATISTICS
+    ========================================== -->
+
+    <section
+      class="stats-grid employee-stats"
+      *ngIf="authService.isEmployee()">
+
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          L
+        </span>
+
+        <div>
+
+          <small>
+            Learning Courses
+          </small>
+
+          <strong>
+            {{
+              coursesLoading
+                ? '...'
+                : totalCourses
+            }}
+          </strong>
+
+          <em>
+            Available courses
+          </em>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          S
+        </span>
+
+        <div>
+
+          <small>
+            Skills
+          </small>
+
+          <strong>
+            {{
+              skillsLoading
+                ? '...'
+                : totalSkills
+            }}
+          </strong>
+
+          <em>
+            Skill development
+          </em>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat">
+
+        <span class="stat-icon">
+          C
+        </span>
+
+        <div>
+
+          <small>
+            Certificates
+          </small>
+
+          <strong>
+            {{
+              certificationsLoading
+                ? '...'
+                : totalCertificates
+            }}
+          </strong>
+
+          <em>
+            Learning credentials
+          </em>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================================
+         ADMIN / HR MAIN PANELS
+    ========================================== -->
+
+    <section
+      class="content-grid"
+      *ngIf="authService.isAdmin() || authService.isHR()">
+
+
+      <!-- RECENT EMPLOYEES -->
+
+      <article class="panel large">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              WORKFORCE
+            </span>
+
+            <h2>
+              Recent Employees
+            </h2>
+
+          </div>
+
+
+          <a routerLink="/employees">
+            View all →
+          </a>
+
+        </div>
+
+
+        <div
+          class="empty"
+          *ngIf="
+            !employeesLoading
+            &&
+            recentEmployees.length === 0
+          ">
+          No employee data available.
+        </div>
+
+
+        <div
+          class="person-row"
+          *ngFor="let employee of recentEmployees">
+
+          <div class="avatar small">
+            {{ displayName(employee).charAt(0) }}
+          </div>
+
+
+          <div class="grow">
+
+            <strong>
+              {{ displayName(employee) }}
+            </strong>
+
+            <small>
+              {{
+                employee.designation
+                ||
+                employee.department
+                ||
+                'Employee'
+              }}
+            </small>
+
+          </div>
+
+
+          <span class="pill success">
+            {{
+              employee.status
+              ||
+              'ACTIVE'
+            }}
+          </span>
+
+        </div>
+
+      </article>
+
+
+      <!-- MANAGEMENT -->
+
+      <article class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              QUICK ACCESS
+            </span>
+
+            <h2>
+              Management
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <a
+          class="quick-link"
+          routerLink="/employees">
+
+          <span>
+            E
+          </span>
+
+          <div>
+
+            <strong>
+              Employee Directory
+            </strong>
+
+            <small>
+              View and manage employees
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/learning">
+
+          <span>
+            L
+          </span>
+
+          <div>
+
+            <strong>
+              Course Management
+            </strong>
+
+            <small>
+              Manage learning courses
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/skills">
+
+          <span>
+            S
+          </span>
+
+          <div>
+
+            <strong>
+              Skills Management
+            </strong>
+
+            <small>
+              Manage organization skills
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/analytics">
+
+          <span>
+            A
+          </span>
+
+          <div>
+
+            <strong>
+              Analytics
+            </strong>
+
+            <small>
+              Workforce reports and insights
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================================
+         EMPLOYEE MAIN PANELS
+    ========================================== -->
+
+    <section
+      class="content-grid"
+      *ngIf="authService.isEmployee()">
+
+
+      <!-- AVAILABLE COURSES -->
+
+      <article class="panel large">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              MY LEARNING
+            </span>
+
+            <h2>
+              Available Courses
+            </h2>
+
+          </div>
+
+
+          <a routerLink="/learning">
+            Open Learning →
+          </a>
+
+        </div>
+
+
+        <div
+          class="course-row"
+          *ngFor="let course of courses.slice(0, 4)">
+
+          <div>
+
+            <strong>
+              {{
+                course.courseName
+                ||
+                course.title
+                ||
+                'Course'
+              }}
+            </strong>
+
+            <small>
+              {{
+                course.trainerName
+                ||
+                'Learning course'
+              }}
+            </small>
+
+          </div>
+
+
+          <span class="pill">
+            {{
+              course.level
+              ||
+              'ACTIVE'
+            }}
+          </span>
+
+        </div>
+
+
+        <div
+          class="empty"
+          *ngIf="
+            !coursesLoading
+            &&
+            courses.length === 0
+          ">
+          No courses available.
+        </div>
+
+      </article>
+
+
+      <!-- EMPLOYEE QUICK ACCESS -->
+
+      <article class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              QUICK ACCESS
+            </span>
+
+            <h2>
+              My Workspace
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <a
+          class="quick-link"
+          routerLink="/learning">
+
+          <span>
+            L
+          </span>
+
+          <div>
+
+            <strong>
+              Start Learning
+            </strong>
+
+            <small>
+              Select and start a course
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/skills">
+
+          <span>
+            S
+          </span>
+
+          <div>
+
+            <strong>
+              My Skills
+            </strong>
+
+            <small>
+              View skill information
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/certifications">
+
+          <span>
+            C
+          </span>
+
+          <div>
+
+            <strong>
+              My Certificates
+            </strong>
+
+            <small>
+              View earned credentials
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+
+        <a
+          class="quick-link"
+          routerLink="/career">
+
+          <span>
+            G
+          </span>
+
+          <div>
+
+            <strong>
+              Career Growth
+            </strong>
+
+            <small>
+              Explore career paths
+            </small>
+
+          </div>
+
+          <b>
+            →
+          </b>
+
+        </a>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================================
+         LOWER SECTION - ALL ROLES
+    ========================================== -->
+
+    <section class="content-grid lower">
+
+
+      <!-- COURSE SNAPSHOT -->
+
+      <article class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              LEARNING
+            </span>
+
+            <h2>
+              Course Snapshot
+            </h2>
+
+          </div>
+
+
+          <a routerLink="/learning">
+            Open catalog →
+          </a>
+
+        </div>
+
+
+        <div
+          class="course-row"
+          *ngFor="let course of courses.slice(0, 4)">
+
+          <div>
+
+            <strong>
+              {{
+                course.courseName
+                ||
+                course.title
+                ||
+                'Course'
+              }}
+            </strong>
+
+
+            <small>
+              {{
+                course.trainerName
+                ||
+                course.level
+                ||
+                'Learning course'
+              }}
+            </small>
+
+          </div>
+
+
+          <span class="pill">
+            {{
+              course.level
+              ||
+              'ACTIVE'
+            }}
+          </span>
+
+        </div>
+
+
+        <div
+          class="empty"
+          *ngIf="
+            !coursesLoading
+            &&
+            courses.length === 0
+          ">
+          No courses available.
+        </div>
+
+      </article>
+
+
+      <!-- CERTIFICATES -->
+
+      <article class="panel">
+
+        <div class="panel-head">
+
+          <div>
+
+            <span class="orange-label">
+              CREDENTIALS
+            </span>
+
+            <h2 *ngIf="authService.isEmployee()">
+              My Certificates
+            </h2>
+
+            <h2 *ngIf="authService.isAdmin() || authService.isHR()">
+              Latest Certificates
+            </h2>
+
+          </div>
+
+
+          <a routerLink="/certifications">
+            Open certificates →
+          </a>
+
+        </div>
+
+
+        <div
+          class="course-row"
+          *ngFor="let certificate of certifications.slice(0, 4)">
+
+          <div>
+
+            <strong>
+              {{
+                certificate.courseName
+                ||
+                certificate.certificationName
+                ||
+                certificate.certificateName
+                ||
+                'Certificate'
+              }}
+            </strong>
+
+
+            <small>
+              {{
+                certificate.certificateNumber
+                ||
+                certificate.employeeId
+                ||
+                'Issued credential'
+              }}
+            </small>
+
+          </div>
+
+
+          <span class="pill success">
+            {{
+              certificate.status
+              ||
+              'ISSUED'
+            }}
+          </span>
+
+        </div>
+
+
+        <div
+          class="empty"
+          *ngIf="
+            !certificationsLoading
+            &&
+            certifications.length === 0
+          ">
+          No certificates available.
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+</div>

@@ -1,0 +1,180 @@
+<div class="register-container">
+
+  <div class="register-card">
+
+    <h1>Create Account</h1>
+
+    <p>
+      Join SkillSphere Nexus
+    </p>
+
+
+    <form
+      (ngSubmit)="register()"
+      #registerForm="ngForm">
+
+
+      <input
+        type="text"
+        name="firstName"
+        [(ngModel)]="firstName"
+        placeholder="First Name"
+        required>
+
+
+      <input
+        type="text"
+        name="lastName"
+        [(ngModel)]="lastName"
+        placeholder="Last Name"
+        required>
+
+
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="Email"
+        required>
+
+
+      <input
+        type="text"
+        name="phone"
+        [(ngModel)]="phone"
+        placeholder="Phone"
+        required>
+
+
+      <select
+        name="department"
+        [(ngModel)]="department"
+        required>
+
+        <option value="">
+          Select Department
+        </option>
+
+        <option value="IT">
+          IT
+        </option>
+
+        <option value="Finance">
+          Finance
+        </option>
+
+        <option value="HR">
+          HR
+        </option>
+
+        <option value="Operations">
+          Operations
+        </option>
+
+        <option value="Marketing">
+          Marketing
+        </option>
+
+      </select>
+
+
+      <select
+        name="role"
+        [(ngModel)]="role"
+        required>
+
+        <option value="Employee">
+          Employee
+        </option>
+
+      </select>
+
+
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="Password"
+        required>
+
+
+      <input
+        type="password"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        placeholder="Confirm Password"
+        required>
+
+
+      <label class="checkbox">
+
+        <input
+          type="checkbox"
+          name="terms"
+          required>
+
+        <span>
+          I agree to the Terms & Conditions
+        </span>
+
+      </label>
+
+
+      <label class="checkbox">
+
+        <input
+          type="checkbox"
+          name="privacy"
+          required>
+
+        <span>
+          I agree to the Privacy Policy
+        </span>
+
+      </label>
+
+
+      <div
+        *ngIf="errorMessage"
+        style="
+          color:#fca5a5;
+          background:#3f1d24;
+          padding:10px;
+          border-radius:8px;
+          margin-top:12px;
+        ">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="register-btn"
+        [disabled]="isLoading">
+
+        {{
+          isLoading
+            ? 'Creating Account...'
+            : 'Create Account'
+        }}
+
+      </button>
+
+
+      <p class="login-link">
+
+        Already have an account?
+
+        <a routerLink="/login">
+          Sign In
+        </a>
+
+      </p>
+
+    </form>
+
+  </div>
+
+</div>

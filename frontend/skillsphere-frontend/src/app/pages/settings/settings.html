@@ -1,0 +1,653 @@
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-title">
+  Enterprise Learning
+</div>
+
+<div class="brand-subtitle">
+  SKILL & CAREER PLATFORM
+</div>
+
+    </div>
+
+
+    <div class="sidebar-line">
+    </div>
+
+
+    <nav class="nav-menu">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+
+        Dashboard
+
+      </a>
+
+
+      <a
+        *ngIf="
+          authService
+            .canManageEmployees()
+        "
+        routerLink="/employees"
+        routerLinkActive="active">
+
+        Employees
+
+      </a>
+
+
+      <a
+        routerLink="/learning"
+        routerLinkActive="active">
+
+        Learning
+
+      </a>
+
+
+      <a
+        routerLink="/skills"
+        routerLinkActive="active">
+
+        Skills
+
+      </a>
+
+
+      <a
+        routerLink="/certifications"
+        routerLinkActive="active">
+
+        Certifications
+
+      </a>
+
+
+      <a
+        routerLink="/career"
+        routerLinkActive="active">
+
+        Career
+
+      </a>
+
+
+      <a
+        *ngIf="
+          authService.isAdmin()
+          ||
+          authService.isHR()
+        "
+        routerLink="/analytics"
+        routerLinkActive="active">
+
+        Analytics
+
+      </a>
+
+
+      <a
+        routerLink="/settings"
+        routerLinkActive="active">
+
+        Settings
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+
+  <main class="main-content">
+
+
+    <!-- ================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================= -->
+
+    <header class="page-header">
+
+      <div>
+
+        <p class="eyebrow">
+          ACCOUNT
+        </p>
+
+
+        <h1>
+          Settings & Profile
+        </h1>
+
+
+        <p>
+          Manage your profile,
+          notifications and
+          application preferences.
+        </p>
+
+      </div>
+
+
+      <button
+        class="logout-btn"
+        type="button"
+        (click)="logout()">
+
+        Logout
+
+      </button>
+
+    </header>
+
+
+    <!-- ================================= -->
+    <!-- PROFILE -->
+    <!-- ================================= -->
+
+    <section
+      class="settings-card profile-card"
+      *ngIf="
+        profile as user
+      ">
+
+
+      <div class="profile-header">
+
+
+        <div class="profile-avatar">
+
+          {{ initials() }}
+
+        </div>
+
+
+        <div>
+
+          <h2>
+
+            {{ user.firstName }}
+
+            {{ user.lastName }}
+
+          </h2>
+
+
+          <p>
+
+            {{ getProfileSubtitle() }}
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="profile-grid">
+
+
+        <div class="profile-item">
+
+          <span>
+            Employee ID
+          </span>
+
+          <strong>
+
+            {{
+              user.employeeId
+              ||
+              '-'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Employee Code
+          </span>
+
+          <strong>
+
+            {{
+              user.employeeCode
+              ||
+              '-'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Email
+          </span>
+
+          <strong>
+
+            {{
+              user.email
+              ||
+              '-'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Phone
+          </span>
+
+          <strong>
+
+            {{
+              user.phone
+              ||
+              '-'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Department
+          </span>
+
+          <strong>
+
+            {{
+              user.department
+              ||
+              '-'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Designation
+          </span>
+
+          <strong>
+
+            {{
+              user.designation
+              ||
+              getProfileSubtitle()
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Experience
+          </span>
+
+          <strong>
+
+            {{
+              user.experience
+              ||
+              0
+            }}
+
+            Years
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Role
+          </span>
+
+          <strong>
+
+            {{ getRoleLabel() }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="profile-item">
+
+          <span>
+            Status
+          </span>
+
+          <strong class="status-badge">
+
+            {{
+              user.status
+              ||
+              'Active'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================================= -->
+    <!-- SETTINGS GRID -->
+    <!-- ================================= -->
+
+    <div class="settings-grid">
+
+
+      <!-- ================================= -->
+      <!-- NOTIFICATIONS -->
+      <!-- ================================= -->
+
+      <section class="settings-card">
+
+        <div class="section-title">
+
+          Notifications
+
+        </div>
+
+
+        <div class="setting-row">
+
+          <div>
+
+            <strong>
+              Email Notifications
+            </strong>
+
+            <p>
+              Receive important updates
+              through email.
+            </p>
+
+          </div>
+
+
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              notifications.email
+            ">
+
+        </div>
+
+
+        <div class="setting-row">
+
+          <div>
+
+            <strong>
+              Course Updates
+            </strong>
+
+            <p>
+              Receive updates about
+              learning courses.
+            </p>
+
+          </div>
+
+
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              notifications.courseUpdates
+            ">
+
+        </div>
+
+
+        <div class="setting-row">
+
+          <div>
+
+            <strong>
+              Certification Alerts
+            </strong>
+
+            <p>
+              Receive certification expiry
+              and renewal reminders.
+            </p>
+
+          </div>
+
+
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              notifications
+                .certificationAlerts
+            ">
+
+        </div>
+
+
+        <div class="setting-row">
+
+          <div>
+
+            <strong>
+              Career Updates
+            </strong>
+
+            <p>
+              Receive career development
+              updates.
+            </p>
+
+          </div>
+
+
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              notifications
+                .careerUpdates
+            ">
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================= -->
+      <!-- APPLICATION PREFERENCES -->
+      <!-- ================================= -->
+
+      <section class="settings-card">
+
+        <div class="section-title">
+
+          Application Preferences
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Theme
+          </label>
+
+
+          <select
+            [(ngModel)]="
+              preferences.theme
+            "
+            (change)="
+              changeTheme()
+            ">
+
+            <option value="Dark">
+              Dark
+            </option>
+
+            <option value="Light">
+              Light
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Language
+          </label>
+
+
+          <select
+            [(ngModel)]="
+              preferences.language
+            ">
+
+            <option value="English">
+              English
+            </option>
+
+            <option value="Telugu">
+              Telugu
+            </option>
+
+            <option value="Hindi">
+              Hindi
+            </option>
+
+            <option value="Tamil">
+              Tamil
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Timezone
+          </label>
+
+
+          <select
+            [(ngModel)]="
+              preferences.timezone
+            ">
+
+            <option
+              value="
+                IST (UTC+5:30)
+              ">
+
+              IST (UTC+5:30)
+
+            </option>
+
+
+            <option value="UTC">
+
+              UTC
+
+            </option>
+
+
+            <option
+              value="
+                EST (UTC-5:00)
+              ">
+
+              EST (UTC-5:00)
+
+            </option>
+
+          </select>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- ================================= -->
+    <!-- ACTIONS -->
+    <!-- ================================= -->
+
+    <div class="actions">
+
+
+      <button
+        class="reset-btn"
+        type="button"
+        (click)="
+          resetSettings()
+        ">
+
+        Reset
+
+      </button>
+
+
+      <button
+        class="save-btn"
+        type="button"
+        (click)="
+          saveSettings()
+        ">
+
+        Save Changes
+
+      </button>
+
+    </div>
+
+
+  </main>
+
+</div>

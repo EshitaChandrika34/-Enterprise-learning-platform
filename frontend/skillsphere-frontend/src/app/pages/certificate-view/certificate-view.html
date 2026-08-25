@@ -1,0 +1,404 @@
+<div class="certificate-page">
+
+  <!-- ========================================= -->
+  <!-- ACTIONS -->
+  <!-- ========================================= -->
+
+  <div class="top-actions">
+
+    <a
+      routerLink="/certifications"
+      class="back-button">
+
+      ← Back to Certifications
+
+    </a>
+
+
+    <button
+      *ngIf="certificate"
+      class="print-button"
+      type="button"
+      (click)="printCertificate()">
+
+      Print / Save PDF
+
+    </button>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- LOADING -->
+  <!-- ========================================= -->
+
+  <div
+    *ngIf="loading"
+    class="loading">
+
+    Loading certificate...
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- ERROR -->
+  <!-- ========================================= -->
+
+  <div
+    *ngIf="
+      !loading
+      &&
+      errorMessage
+    "
+    class="error-message">
+
+    <h2>
+      Unable to display certificate
+    </h2>
+
+    <p>
+      {{ errorMessage }}
+    </p>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- CERTIFICATE -->
+  <!-- ========================================= -->
+
+  <div
+    *ngIf="
+      !loading
+      &&
+      certificate
+    "
+    class="certificate-container">
+
+    <div class="certificate">
+
+
+      <!-- TOP DECORATION -->
+
+      <div class="top-decoration">
+
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+
+      </div>
+
+
+      <!-- BRAND -->
+
+      <div class="brand-section">
+
+        <div class="brand-name">
+          SkillSphere
+        </div>
+
+        <div class="brand-subtitle">
+          LEARNING PLATFORM
+        </div>
+
+      </div>
+
+
+      <!-- TITLE -->
+
+      <div class="title-row">
+
+        <div class="title-lines">
+
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+
+        <h1>
+          COURSE COMPLETION CERTIFICATE
+        </h1>
+
+
+        <div class="title-lines">
+
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================================= -->
+      <!-- EMPLOYEE -->
+      <!-- ========================================= -->
+
+      <div class="recipient-section">
+
+        <p class="award-text">
+          The certificate is awarded to
+        </p>
+
+
+        <h2 class="employee-name">
+          {{ employeeName }}
+        </h2>
+
+
+        <div class="employee-certificate-details">
+
+          <span>
+
+            Employee Code
+
+            <strong>
+              {{ employeeCode }}
+            </strong>
+
+          </span>
+
+
+          <span>
+
+            Department
+
+            <strong>
+              {{ department }}
+            </strong>
+
+          </span>
+
+
+          <span>
+
+            Designation
+
+            <strong>
+              {{ designation }}
+            </strong>
+
+          </span>
+
+        </div>
+
+
+        <p class="completion-text">
+          for successfully completing the course
+        </p>
+
+
+        <h3 class="course-name">
+
+          {{
+            certificate.courseName
+            ||
+            'Learning Course'
+          }}
+
+        </h3>
+
+
+        <p class="completion-date">
+
+          on
+
+          <strong>
+            {{
+              formatDate(
+                certificate.issueDate
+              )
+            }}
+          </strong>
+
+        </p>
+
+      </div>
+
+
+      <!-- ========================================= -->
+      <!-- LOWER SECTION -->
+      <!-- ========================================= -->
+
+      <div class="lower-section">
+
+
+        <!-- LEFT -->
+
+        <div class="left-section">
+
+          <div class="verification-box">
+
+            <div class="verify-mark">
+              SS
+            </div>
+
+            <strong>
+              VERIFIED
+            </strong>
+
+            <span>
+              SkillSphere Certificate
+            </span>
+
+          </div>
+
+
+          <div class="issue-information">
+
+            <div class="info-item">
+
+              <span>
+                Certificate Number
+              </span>
+
+              <strong>
+                {{
+                  certificate.certificateNumber
+                  ||
+                  '-'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Enrollment ID
+              </span>
+
+              <strong>
+                {{ certificate.enrollmentId }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Issue Date
+              </span>
+
+              <strong>
+                {{
+                  formatDate(
+                    certificate.issueDate
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CENTER -->
+
+        <div class="center-message">
+
+          <div class="platform-sign">
+            SkillSphere
+          </div>
+
+
+          <div class="certificate-status">
+
+            {{
+              certificate.status
+              ||
+              'ISSUED'
+            }}
+
+          </div>
+
+
+          <div class="congratulations">
+
+            Congratulations!
+
+            <br>
+
+            Your learning achievement
+
+            <br>
+
+            makes us proud.
+
+          </div>
+
+        </div>
+
+
+        <!-- SIGNATURE -->
+
+        <div class="signature-block">
+
+          <div class="signature-writing">
+            SkillSphere
+          </div>
+
+
+          <div class="signature-line"></div>
+
+
+          <strong>
+            Learning Program Head
+          </strong>
+
+
+          <span>
+            Learning & Development
+          </span>
+
+
+          <span>
+            SkillSphere Nexus
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- FOOTER -->
+
+      <div class="certificate-footer">
+
+        <span>
+
+          Certificate ID:
+
+          {{
+            certificate.certificateId
+          }}
+
+        </span>
+
+
+        <span>
+          Minimum certification threshold achieved
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
