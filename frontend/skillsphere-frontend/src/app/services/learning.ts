@@ -1,117 +1,100 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
+import { Observable, map } from 'rxjs';
 
 export interface Course {
-
   courseId?: number;
-
   courseName: string;
-
   description: string;
-
   trainerName: string;
-
   duration: number;
-
   level: string;
 }
 
-
 export interface Enrollment {
-
   enrollmentId?: number;
-
   employeeId: number;
-
   courseId: number;
-
   enrollmentDate: string;
-
   status: string;
+  progressPercentage?: number;
 }
 
-
 export interface CourseProgress {
-
   progressId?: number;
-
   enrollmentId: number;
-
   progressPercentage: number;
-
   completionStatus: string;
-
   lastUpdatedDate: string;
 }
 
-
 export interface LearningCertificate {
-
   certificateId?: number;
-
   enrollmentId: number;
-
   certificateNumber?: string;
-
   courseName?: string;
-
   issueDate?: string;
-
   status?: string;
 }
 
-
 export interface CertificateEligibility {
-
   enrollmentId: number;
-
   threshold: number;
-
   eligible: boolean;
-
   message: string;
 }
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class LearningService {
 
-  private baseUrl =
-    'http://localhost:8084';
+  private baseUrl = 'http://localhost:8084';
 
+  constructor(private http: HttpClient) {}
 
-  constructor(
-    private http: HttpClient
-  ) {}
+  // ==========================================
+  // GET LOGGED-IN EMPLOYEE ID
+  // ==========================================
 
+  private getEmployeeId(): number {
+
+    const storedUser = localStorage.getItem('loggedInUser');
+
+    if (!storedUser) {
+      return 0;
+    }
+
+    try {
+
+      const user = JSON.parse(storedUser);
+
+      return Number(user.id || user.employeeId || 0);
+
+    } catch {
+
+      return 0;
+    }
+  }
 
   // ==========================================
   // COURSES
   // ==========================================
 
-  getCourses():
-    Observable<Course[]> {
+  getCourses(): Observable<Course[]> {
 
     return this.http.get<Course[]>(
       `${this.baseUrl}/courses`
     );
   }
 
-
-  addCourse(
-    course: Course
-  ): Observable<Course> {
+  addCourse(course: Course): Observable<Course> {
 
     return this.http.post<Course>(
       `${this.baseUrl}/courses`,
       course
     );
   }
-
 
   updateCourse(
     id: number,
@@ -124,39 +107,33 @@ export class LearningService {
     );
   }
 
-
-  deleteCourse(
-    id: number
-  ): Observable<any> {
+  deleteCourse(id: number): Observable<any> {
 
     return this.http.delete(
       `${this.baseUrl}/courses/${id}`
     );
   }
 
-
   // ==========================================
   // ENROLLMENTS
   // ==========================================
 
-  getEnrollments():
-    Observable<Enrollment[]> {
+  getEnrollments(
+    employeeId?: number
+  ): Observable<Enrollment[]> {
+
+    const id =
+      employeeId || this.getEmployeeId();
 
     return this.http.get<Enrollment[]>(
-      `${this.baseUrl}/enrollments`
+      `${this.baseUrl}/enrollments/employee/${id}`
     );
   }
-
-
-  getEnrollmentById(
-    id: number
-  ): Observable<Enrollment> {
-
-    return this.http.get<Enrollment>(
-      `${this.baseUrl}/enrollments/${id}`
-    );
-  }
-
+  getEnrollmentById(enrollmentId: number): Observable<Enrollment> {
+  return this.http.get<Enrollment>(
+    `${this.baseUrl}/enrollments/${enrollmentId}`
+  );
+}
 
   createEnrollment(
     enrollment: Enrollment
@@ -168,74 +145,81 @@ export class LearningService {
     );
   }
 
+  // ==========================================
+  // UPDATE PROGRESS
+  // ==========================================
 
-  updateEnrollment(
-    id: number,
-    enrollment: Enrollment
+  updateEnrollmentProgress(
+    enrollmentId: number,
+    progressPercentage: number
   ): Observable<Enrollment> {
 
     return this.http.put<Enrollment>(
-      `${this.baseUrl}/enrollments/${id}`,
-      enrollment
+      `${this.baseUrl}/enrollments/${enrollmentId}/progress`,
+      null,
+      {
+        params: {
+          progressPercentage:
+            progressPercentage.toString()
+        }
+      }
     );
   }
-
-
-  deleteEnrollment(
-    id: number
-  ): Observable<any> {
-
-    return this.http.delete(
-      `${this.baseUrl}/enrollments/${id}`
-    );
-  }
-
 
   // ==========================================
   // PROGRESS
   // ==========================================
 
-  getProgress():
-    Observable<CourseProgress[]> {
+  getProgress(
+    employeeId?: number
+  ): Observable<CourseProgress[]> {
 
-    return this.http.get<CourseProgress[]>(
-      `${this.baseUrl}/progress`
+    return this.getEnrollments(employeeId).pipe(
+
+      map((enrollments: Enrollment[]) => {
+
+        return enrollments.map(
+          (enrollment: Enrollment) => {
+
+            const percentage =
+              Number(
+                enrollment.progressPercentage || 0
+              );
+
+            return {
+
+              enrollmentId:
+                enrollment.enrollmentId || 0,
+
+              progressPercentage:
+                percentage,
+
+              completionStatus:
+                enrollment.status === 'COMPLETED'
+                  ? 'COMPLETED'
+                  : percentage > 0
+                    ? 'IN_PROGRESS'
+                    : enrollment.status || 'ENROLLED',
+
+              lastUpdatedDate:
+                enrollment.enrollmentDate || ''
+            };
+          }
+        );
+      })
     );
   }
-
-
-  createProgress(
-    progress: CourseProgress
-  ): Observable<CourseProgress> {
-
-    return this.http.post<CourseProgress>(
-      `${this.baseUrl}/progress`,
-      progress
-    );
-  }
-
 
   updateProgress(
     id: number,
     progress: CourseProgress
-  ): Observable<CourseProgress> {
+  ): Observable<Enrollment> {
 
-    return this.http.put<CourseProgress>(
-      `${this.baseUrl}/progress/${id}`,
-      progress
+    return this.updateEnrollmentProgress(
+      id,
+      progress.progressPercentage
     );
   }
-
-
-  deleteProgress(
-    id: number
-  ): Observable<any> {
-
-    return this.http.delete(
-      `${this.baseUrl}/progress/${id}`
-    );
-  }
-
 
   // ==========================================
   // CERTIFICATES
@@ -249,7 +233,6 @@ export class LearningService {
     );
   }
 
-
   getCertificatesByEnrollment(
     enrollmentId: number
   ): Observable<LearningCertificate[]> {
@@ -258,7 +241,6 @@ export class LearningService {
       `${this.baseUrl}/certificates/enrollment/${enrollmentId}`
     );
   }
-
 
   checkCertificateEligibility(
     enrollmentId: number
@@ -269,7 +251,6 @@ export class LearningService {
     );
   }
 
-
   checkEligibility(
     enrollmentId: number
   ): Observable<CertificateEligibility> {
@@ -278,7 +259,6 @@ export class LearningService {
       `${this.baseUrl}/certificates/eligibility/${enrollmentId}`
     );
   }
-
 
   generateCertificate(
     enrollmentId: number
@@ -291,5 +271,4 @@ export class LearningService {
       }
     );
   }
-
 }

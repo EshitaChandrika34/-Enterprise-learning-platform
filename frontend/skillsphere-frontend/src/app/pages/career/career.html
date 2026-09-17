@@ -1,9 +1,8 @@
 <div class="app-layout">
 
-
-  <!-- ==========================================
+  <!-- =========================================================
        SIDEBAR
-  =========================================== -->
+  ========================================================== -->
 
   <aside class="sidebar">
 
@@ -21,28 +20,21 @@
 
     <div class="sidebar-line"></div>
 
-
     <nav class="nav-menu">
 
       <a
         routerLink="/dashboard"
         routerLinkActive="active"
-        [routerLinkActiveOptions]="{
-          exact: true
-        }">
+        [routerLinkActiveOptions]="{ exact: true }">
         Dashboard
       </a>
 
-
       <a
-        *ngIf="
-          authService.canManageEmployees()
-        "
+        *ngIf="authService.canManageEmployees()"
         routerLink="/employees"
         routerLinkActive="active">
         Employees
       </a>
-
 
       <a
         routerLink="/learning"
@@ -50,13 +42,11 @@
         Learning
       </a>
 
-
       <a
         routerLink="/skills"
         routerLinkActive="active">
         Skills
       </a>
-
 
       <a
         routerLink="/certifications"
@@ -64,23 +54,18 @@
         Certifications
       </a>
 
-
       <a
         routerLink="/career"
         routerLinkActive="active">
         Career
       </a>
 
-
       <a
-        *ngIf="
-          authService.canViewAnalytics()
-        "
+        *ngIf="authService.canViewAnalytics()"
         routerLink="/analytics"
         routerLinkActive="active">
         Analytics
       </a>
-
 
       <a
         routerLink="/settings"
@@ -93,25 +78,23 @@
   </aside>
 
 
-
-  <!-- ==========================================
-       MAIN
-  =========================================== -->
+  <!-- =========================================================
+       MAIN CONTENT
+  ========================================================== -->
 
   <main class="main-content">
 
 
-    <!-- ==================================================
+    <!-- =======================================================
          EMPLOYEE
-    =================================================== -->
+    ======================================================== -->
 
     <ng-container
-      *ngIf="
-        authService.isEmployee()
-      ">
+      *ngIf="authService.isEmployee()">
 
-
-      <!-- HEADER -->
+      <!-- =====================================================
+           HEADER
+      ====================================================== -->
 
       <header class="page-header">
 
@@ -126,18 +109,18 @@
           </h1>
 
           <p class="page-description">
+
             Track your career readiness,
             identify skill gaps,
-            evaluate promotion eligibility
-            and explore internal opportunities.
+            build your career roadmap
+            and prepare for internal opportunities.
+
           </p>
 
         </div>
 
 
-        <div
-          class="employee-chip"
-          *ngIf="careerProgress">
+        <div class="employee-chip">
 
           <span class="employee-avatar">
 
@@ -161,9 +144,7 @@
               {{
                 careerProgress?.department
                 ||
-                authService
-                  .getLoggedInUser()
-                  ?.department
+                authService.getLoggedInUser()?.department
                 ||
                 'Employee'
               }}
@@ -177,8 +158,9 @@
       </header>
 
 
-
-      <!-- MESSAGES -->
+      <!-- =====================================================
+           MESSAGES
+      ====================================================== -->
 
       <div
         class="loading-box"
@@ -200,9 +182,27 @@
 
       <div
         class="success-box"
+        *ngIf="goalMessage">
+
+        {{ goalMessage }}
+
+      </div>
+
+
+      <div
+        class="success-box"
         *ngIf="applicationMessage">
 
         {{ applicationMessage }}
+
+      </div>
+
+
+      <div
+        class="error-box"
+        *ngIf="goalError">
+
+        {{ goalError }}
 
       </div>
 
@@ -216,17 +216,19 @@
       </div>
 
 
+      <!-- =====================================================
+           EMPLOYEE CONTENT
+      ====================================================== -->
 
       <ng-container
         *ngIf="!loading">
 
 
-        <!-- ==========================================
+        <!-- ===================================================
              SUMMARY
-        =========================================== -->
+        ==================================================== -->
 
         <section class="summary-grid">
-
 
           <article class="summary-card">
 
@@ -235,28 +237,14 @@
             </span>
 
             <strong>
-
-              {{
-                careerProgress
-                  ?.overallProgressPercentage
-                || 0
-              }}%
-
+              {{ overallProgress }}%
             </strong>
 
             <small>
-
-              {{
-                careerProgress
-                  ?.readinessStage
-                ||
-                'EARLY_STAGE'
-              }}
-
+              {{ readinessStage }}
             </small>
 
           </article>
-
 
 
           <article class="summary-card">
@@ -266,37 +254,19 @@
             </span>
 
             <strong>
-
-              {{
-                careerProgress
-                  ?.skillProgressPercentage
-                || 0
-              }}%
-
+              {{ skillProgress }}%
             </strong>
 
             <small>
 
-              {{
-                careerProgress
-                  ?.skillsMatchedCount
-                || 0
-              }}
-
+              {{ matchedSkillCount }}
               /
-
-              {{
-                careerProgress
-                  ?.skillsTotalCount
-                || 0
-              }}
-
+              {{ totalRequiredSkillCount }}
               skills matched
 
             </small>
 
           </article>
-
 
 
           <article class="summary-card">
@@ -308,22 +278,16 @@
             <strong>
 
               {{
-                promotionEvaluation
-                  ?.overallScore
-                || 0
+                promotionEvaluation?.overallScore
+                ?? 0
               }}%
 
             </strong>
 
-            <small
-              [class.success-text]="
-                promotionEvaluation
-                  ?.eligible
-              ">
+            <small>
 
               {{
-                promotionEvaluation
-                  ?.eligible
+                promotionEvaluation?.eligible
                   ? 'ELIGIBLE'
                   : 'NOT ELIGIBLE'
               }}
@@ -331,7 +295,6 @@
             </small>
 
           </article>
-
 
 
           <article class="summary-card">
@@ -353,73 +316,354 @@
         </section>
 
 
+        <!-- ===================================================
+             DEADLINE / ADMIN ALERT
+        ==================================================== -->
 
-        <!-- ==========================================
-             NEW EMPLOYEE
-        =========================================== -->
+        <div
+          class="deadline-alert"
+          *ngIf="isTargetDateExpired">
 
-        <section
-          class="onboarding-card"
-          *ngIf="
-            !hasCareerStarted
-          ">
+          <div class="deadline-alert-icon">
+            ⚠
+          </div>
 
+          <div class="deadline-alert-content">
 
-          <div class="onboarding-content">
-
-            <p class="section-label">
-              GET STARTED
-            </p>
-
-            <h2>
-              Build Your Career Profile
-            </h2>
+            <strong class="deadline-alert-title">
+              ADMIN ALERT: Career Goal Deadline Passed
+            </strong>
 
             <p>
-              Welcome {{ employeeName }}.
-              Your career profile is just getting started.
-              Add your skills and begin learning courses
-              to improve your career readiness,
-              promotion eligibility and internal
-              job recommendations.
+
+              Your target date
+              <strong>
+                {{ formatDate(targetDate) }}
+              </strong>
+              has passed, but your career goal is still
+              <strong>
+                {{ goalStatus }}
+              </strong>.
+
+            </p>
+
+            <p>
+
+              Current Career Readiness:
+              <strong>
+                {{ overallProgress }}%
+              </strong>
+
+            </p>
+
+            <p>
+
+              Please complete your pending learning,
+              certifications and experience requirements.
+
             </p>
 
           </div>
 
-
-          <div class="onboarding-actions">
-
-            <a
-              routerLink="/skills"
-              class="primary-button">
-
-              Add My Skills
-
-            </a>
+        </div>
 
 
-            <a
-              routerLink="/learning"
-              class="secondary-button">
+        <!-- ===================================================
+             CAREER GOAL
+        ==================================================== -->
 
-              Explore Learning
+        <section class="dashboard-panel career-goal-panel">
 
-            </a>
+          <div class="panel-heading">
+
+            <div>
+
+              <p class="section-label">
+                CAREER GOAL
+              </p>
+
+              <h2>
+                My Career Goal
+              </h2>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="primary-button"
+              (click)="openGoalForm()">
+
+              {{
+                careerGoals.length > 0
+                  ? 'Update Goal'
+                  : 'Set Goal'
+              }}
+
+            </button>
+
+          </div>
+
+
+          <!-- CURRENT GOAL -->
+
+          <div
+            class="goal-summary"
+            *ngIf="careerGoals.length > 0">
+
+            <div class="goal-summary-item">
+
+              <span>
+                Target Role
+              </span>
+
+              <strong>
+                {{ targetRole }}
+              </strong>
+
+            </div>
+
+
+            <div class="goal-summary-item">
+
+              <span>
+                Status
+              </span>
+
+              <strong>
+                {{ goalStatus }}
+              </strong>
+
+            </div>
+
+
+            <div class="goal-summary-item">
+
+              <span>
+                Target Date
+              </span>
+
+              <strong>
+                {{ formatDate(targetDate) }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- SET / UPDATE GOAL -->
+
+          <div
+            class="goal-form"
+            *ngIf="showGoalForm">
+
+            <div class="goal-form-header">
+
+              <div>
+
+                <span class="section-label">
+
+                  {{
+                    careerGoals.length > 0
+                      ? 'UPDATE CAREER PLAN'
+                      : 'CREATE CAREER PLAN'
+                  }}
+
+                </span>
+
+                <h3>
+                  Choose Your Target Role
+                </h3>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="close-button"
+                [disabled]="savingGoal"
+                (click)="closeGoalForm()">
+
+                ×
+
+              </button>
+
+            </div>
+
+
+            <div class="goal-form-grid">
+
+
+              <!-- TARGET ROLE -->
+
+              <div class="form-group">
+
+                <label for="careerTargetRole">
+                  Target Role
+                </label>
+
+                <select
+                  id="careerTargetRole"
+                  [(ngModel)]="selectedTargetRole">
+
+                  <option value="">
+                    Select a career path
+                  </option>
+
+                  <option
+                    *ngFor="let path of careerPaths"
+                    [value]="path.targetRole">
+
+                    {{ path.targetRole }}
+
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <!-- TARGET DATE -->
+
+              <div class="form-group">
+
+                <label for="careerTargetDate">
+                  Target Date
+                </label>
+
+                <input
+                  id="careerTargetDate"
+                  type="date"
+                  [(ngModel)]="selectedTargetDate" />
+
+              </div>
+
+
+              <!-- STATUS -->
+
+              <div class="form-group">
+
+                <label for="careerGoalStatus">
+                  Status
+                </label>
+
+                <select
+                  id="careerGoalStatus"
+                  [(ngModel)]="selectedGoalStatus">
+
+                  <option value="IN_PROGRESS">
+                    IN_PROGRESS
+                  </option>
+
+                  <option value="NOT_STARTED">
+                    NOT_STARTED
+                  </option>
+
+                  <option value="COMPLETED">
+                    COMPLETED
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <div class="form-group">
+
+              <label for="careerGoalNotes">
+                Notes
+              </label>
+
+              <textarea
+                id="careerGoalNotes"
+                rows="4"
+                [(ngModel)]="goalNotes"
+                placeholder="Describe your career objective">
+              </textarea>
+
+            </div>
+
+
+            <!-- SELECTED ROLE PREVIEW -->
+
+            <div
+              class="goal-preview"
+              *ngIf="selectedTargetRole">
+
+              <div>
+
+                <span>
+                  Your target
+                </span>
+
+                <strong>
+                  {{ selectedTargetRole }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Next step
+                </span>
+
+                <strong>
+                  Build the required skills
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- FORM BUTTONS -->
+
+            <div class="goal-form-actions">
+
+              <button
+                type="button"
+                class="primary-button"
+                [disabled]="savingGoal"
+                (click)="saveCareerGoal()">
+
+                {{
+                  savingGoal
+                    ? 'Saving...'
+                    : 'Save Career Goal'
+                }}
+
+              </button>
+
+
+              <button
+                type="button"
+                class="secondary-button"
+                [disabled]="savingGoal"
+                (click)="closeGoalForm()">
+
+                Cancel
+
+              </button>
+
+            </div>
 
           </div>
 
         </section>
 
 
+        <!-- ===================================================
+             CAREER ROADMAP
+        ==================================================== -->
 
-        <!-- ==========================================
-             ROADMAP
-        =========================================== -->
-
-        <section
-          class="dashboard-panel"
-          *ngIf="careerProgress">
-
+        <section class="dashboard-panel roadmap-panel">
 
           <div class="panel-heading">
 
@@ -437,22 +681,15 @@
 
 
             <span class="status-badge">
-
-              {{
-                careerProgress
-                  ?.readinessStage
-                ||
-                'EARLY_STAGE'
-              }}
-
+              {{ readinessStage }}
             </span>
 
           </div>
 
 
+          <!-- ROLE PATH -->
 
-          <div class="roadmap">
-
+          <div class="roadmap-roles">
 
             <div class="roadmap-role">
 
@@ -467,8 +704,9 @@
               <small>
 
                 {{
-                  careerProgress
-                    ?.department
+                  careerProgress?.department
+                  ||
+                  authService.getLoggedInUser()?.department
                   ||
                   '-'
                 }}
@@ -478,40 +716,29 @@
             </div>
 
 
-
             <div class="roadmap-arrow">
-
-              <div class="arrow-line">
-              </div>
-
-              <b>
-                →
-              </b>
-
+              →
             </div>
 
 
-
-            <div
-              class="roadmap-role target">
+            <div class="roadmap-role target">
 
               <span class="roadmap-caption">
                 TARGET ROLE
               </span>
 
               <strong>
-
-                {{
-                  careerProgress
-                    ?.targetRole
-                  ||
-                  'Not Set'
-                }}
-
+                {{ targetRole }}
               </strong>
 
               <small>
-                Career Goal
+
+                {{
+                  careerGoals.length > 0
+                    ? 'Career Goal'
+                    : 'Choose a career goal'
+                }}
+
               </small>
 
             </div>
@@ -519,6 +746,7 @@
           </div>
 
 
+          <!-- OVERALL PROGRESS -->
 
           <div class="progress-area">
 
@@ -529,13 +757,7 @@
               </span>
 
               <strong>
-
-                {{
-                  careerProgress
-                    ?.overallProgressPercentage
-                  || 0
-                }}%
-
+                {{ overallProgress }}%
               </strong>
 
             </div>
@@ -545,11 +767,7 @@
 
               <div
                 class="progress-fill"
-                [style.width.%]="
-                  careerProgress
-                    ?.overallProgressPercentage
-                  || 0
-                ">
+                [style.width.%]="overallProgress">
               </div>
 
             </div>
@@ -557,9 +775,9 @@
           </div>
 
 
+          <!-- PROGRESS DETAILS -->
 
           <div class="roadmap-details">
-
 
             <div>
 
@@ -568,13 +786,7 @@
               </span>
 
               <strong>
-
-                {{
-                  careerProgress
-                    ?.skillProgressPercentage
-                  || 0
-                }}%
-
+                {{ skillProgress }}%
               </strong>
 
             </div>
@@ -588,19 +800,9 @@
 
               <strong>
 
-                {{
-                  careerProgress
-                    ?.skillsMatchedCount
-                  || 0
-                }}
-
+                {{ matchedSkillCount }}
                 /
-
-                {{
-                  careerProgress
-                    ?.skillsTotalCount
-                  || 0
-                }}
+                {{ totalRequiredSkillCount }}
 
               </strong>
 
@@ -627,8 +829,50 @@
               </span>
 
               <strong>
-                {{ targetDate }}
+                {{ formatDate(targetDate) }}
               </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               STEP-BY-STEP ROADMAP
+          ================================================== -->
+
+          <div class="roadmap-steps">
+
+            <div
+              class="roadmap-step"
+              *ngFor="let step of careerRoadmapSteps"
+              [class.completed]="step.completed"
+              [class.active]="step.active">
+
+              <div class="roadmap-step-number">
+
+                <span *ngIf="!step.completed">
+                  {{ step.number }}
+                </span>
+
+                <span *ngIf="step.completed">
+                  ✓
+                </span>
+
+              </div>
+
+
+              <div class="roadmap-step-content">
+
+                <strong>
+                  {{ step.title }}
+                </strong>
+
+                <p>
+                  {{ step.description }}
+                </p>
+
+              </div>
 
             </div>
 
@@ -637,17 +881,14 @@
         </section>
 
 
-
-        <!-- ==========================================
+        <!-- ===================================================
              SKILL GAP + LEARNING
-        =========================================== -->
+        ==================================================== -->
 
-        <section
-          class="two-column-section"
-          *ngIf="recommendations">
+        <section class="two-column-section">
 
 
-          <!-- SKILLS -->
+          <!-- SKILL GAP -->
 
           <article class="dashboard-panel">
 
@@ -669,9 +910,9 @@
               <span class="percentage-badge">
 
                 {{
-                  recommendations
-                    ?.matchPercentage
-                  || 0
+                  recommendations?.matchPercentage
+                  ?? skillProgress
+                  ?? 0
                 }}%
 
               </span>
@@ -688,11 +929,7 @@
 
               <span
                 class="skill-tag available"
-                *ngFor="
-                  let skill
-                  of recommendations
-                    ?.currentSkills
-                ">
+                *ngFor="let skill of recommendations?.currentSkills">
 
                 ✓ {{ skill }}
 
@@ -706,19 +943,16 @@
               *ngIf="
                 !recommendations?.currentSkills
                 ||
-                recommendations
-                  .currentSkills
-                  .length === 0
+                recommendations.currentSkills.length === 0
               ">
 
               No skills added yet.
 
-              <br>
+              <br />
 
               Add skills from the Skills page.
 
             </div>
-
 
 
             <h4 class="mini-heading">
@@ -730,20 +964,32 @@
 
               <span
                 class="skill-tag missing"
-                *ngFor="
-                  let skill
-                  of recommendations
-                    ?.missingSkills
-                ">
+                *ngFor="let skill of recommendations?.missingSkills">
 
-                {{ skill }}
+                ✗ {{ skill }}
 
               </span>
 
             </div>
 
-          </article>
 
+            <div
+              class="empty-message"
+              *ngIf="
+                !recommendations?.missingSkills
+                ||
+                recommendations.missingSkills.length === 0
+              ">
+
+              {{
+                careerGoals.length > 0
+                  ? 'No missing career skills identified.'
+                  : 'Set a career goal to identify missing skills.'
+              }}
+
+            </div>
+
+          </article>
 
 
           <!-- LEARNING -->
@@ -770,9 +1016,7 @@
             <div
               class="recommendation-item"
               *ngFor="
-                let course
-                of recommendations
-                  ?.suggestedCourses
+                let course of recommendations?.suggestedCourses
               ">
 
               <div class="recommendation-icon">
@@ -783,7 +1027,13 @@
               <div>
 
                 <strong>
-                  {{ course }}
+
+                  {{
+                    course?.title
+                    ||
+                    course
+                  }}
+
                 </strong>
 
                 <small>
@@ -800,12 +1050,14 @@
               *ngIf="
                 !recommendations?.suggestedCourses
                 ||
-                recommendations
-                  .suggestedCourses
-                  .length === 0
+                recommendations.suggestedCourses.length === 0
               ">
 
-              No learning recommendations yet.
+              {{
+                careerGoals.length > 0
+                  ? 'No learning recommendations yet.'
+                  : 'Set a career goal to receive learning recommendations.'
+              }}
 
             </div>
 
@@ -823,20 +1075,16 @@
         </section>
 
 
-
-        <!-- ==========================================
-             PROMOTION + MATCHED JOBS
-        =========================================== -->
+        <!-- ===================================================
+             PROMOTION + RECOMMENDED JOBS
+        ==================================================== -->
 
         <section class="two-column-section">
 
 
           <!-- PROMOTION -->
 
-          <article
-            class="dashboard-panel"
-            *ngIf="promotionEvaluation">
-
+          <article class="dashboard-panel">
 
             <div class="panel-heading">
 
@@ -855,14 +1103,10 @@
 
               <span
                 class="eligibility-badge"
-                [class.eligible]="
-                  promotionEvaluation
-                    ?.eligible
-                ">
+                [class.eligible]="promotionEvaluation?.eligible">
 
                 {{
-                  promotionEvaluation
-                    ?.eligible
+                  promotionEvaluation?.eligible
                     ? 'ELIGIBLE'
                     : 'NOT ELIGIBLE'
                 }}
@@ -881,10 +1125,9 @@
               <strong>
 
                 {{
-                  promotionEvaluation
-                    ?.targetRole
+                  promotionEvaluation?.targetRole
                   ||
-                  'Not Set'
+                  targetRole
                 }}
 
               </strong>
@@ -901,9 +1144,8 @@
               <strong>
 
                 {{
-                  promotionEvaluation
-                    ?.overallScore
-                  || 0
+                  promotionEvaluation?.overallScore
+                  ?? 0
                 }}%
 
               </strong>
@@ -920,9 +1162,8 @@
               <strong>
 
                 {{
-                  promotionEvaluation
-                    ?.minimumRequiredScore
-                  || 0
+                  promotionEvaluation?.minimumRequiredScore
+                  ?? 0
                 }}%
 
               </strong>
@@ -939,8 +1180,7 @@
               <strong>
 
                 {{
-                  promotionEvaluation
-                    ?.skillsSatisfied
+                  promotionEvaluation?.skillsSatisfied
                     ? 'Satisfied'
                     : 'Pending'
                 }}
@@ -952,8 +1192,7 @@
           </article>
 
 
-
-          <!-- MATCHED JOBS -->
+          <!-- RECOMMENDED JOBS -->
 
           <article class="dashboard-panel">
 
@@ -974,13 +1213,9 @@
             </div>
 
 
-
             <div
               class="job-match-card"
-              *ngFor="
-                let match
-                of matchedJobs
-              ">
+              *ngFor="let match of matchedJobs">
 
 
               <div class="job-top">
@@ -988,16 +1223,37 @@
                 <div>
 
                   <h3>
-                    {{ match.jobTitle }}
+
+                    {{
+                      match.jobTitle
+                      ||
+                      match.title
+                      ||
+                      'Internal Opportunity'
+                    }}
+
                   </h3>
+
 
                   <p>
 
-                    {{ match.jobDepartment }}
+                    {{
+                      match.jobDepartment
+                      ||
+                      match.department
+                      ||
+                      '-'
+                    }}
 
                     ·
 
-                    {{ match.jobLocation }}
+                    {{
+                      match.jobLocation
+                      ||
+                      match.location
+                      ||
+                      '-'
+                    }}
 
                   </p>
 
@@ -1008,13 +1264,15 @@
 
                   {{
                     match.overallMatchScore
-                    || 0
+                    ??
+                    match.matchScore
+                    ??
+                    0
                   }}%
 
                 </div>
 
               </div>
-
 
 
               <div class="job-meta">
@@ -1046,9 +1304,9 @@
 
                     {{
                       match.skillScore
-                      ||
+                      ??
                       match.skillsScore
-                      ||
+                      ??
                       0
                     }}%
 
@@ -1065,7 +1323,8 @@
 
                     {{
                       match.experienceScore
-                      || 0
+                      ??
+                      0
                     }}%
 
                   </strong>
@@ -1075,52 +1334,111 @@
               </div>
 
 
+              <!-- REQUIRED SKILLS -->
 
-              <!-- ALREADY APPLIED -->
+              <h4 class="job-skills-heading">
+                Required Skills
+              </h4>
+
+
+              <div
+                class="job-required-skills"
+                *ngIf="getJobRequiredSkills(match).length > 0">
+
+                <span
+                  class="job-skill-tag"
+                  *ngFor="
+                    let skill of getJobRequiredSkills(match)
+                  ">
+
+                  {{ skill }}
+
+                </span>
+
+              </div>
+
+
+              <!-- MISSING -->
+
+              <div
+                class="missing-job-skills"
+                *ngIf="getMissingJobSkills(match).length > 0">
+
+                <strong>
+                  Skills you still need
+                </strong>
+
+
+                <div class="missing-skill-list">
+
+                  <span
+                    class="missing-job-skill-tag"
+                    *ngFor="
+                      let skill of getMissingJobSkills(match)
+                    ">
+
+                    ✗ {{ skill }}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <!-- READY -->
+
+              <div
+                class="all-job-skills"
+                *ngIf="
+                  getJobRequiredSkills(match).length > 0
+                  &&
+                  getMissingJobSkills(match).length === 0
+                ">
+
+                ✓ You have all the required skills.
+
+              </div>
+
+
+              <!-- APPLICATION -->
 
               <span
                 *ngIf="
                   isApplied(
-                    match.jobId
+                    match.jobId ?? match.id
                   )
                 "
                 class="eligibility-badge eligible">
 
                 {{
                   getApplicationStatus(
-                    match.jobId
+                    match.jobId ?? match.id
                   )
                 }}
 
               </span>
 
 
-
-              <!-- APPLY BUTTON -->
-
               <button
                 *ngIf="
                   !isApplied(
-                    match.jobId
+                    match.jobId ?? match.id
                   )
                 "
                 class="primary-button"
                 type="button"
                 [disabled]="
-                  applyingJobId
-                    ===
-                  match.jobId
+                  applyingJobId ===
+                    (match.jobId ?? match.id)
                   ||
                   !canApplyForJob(match)
                 "
-                (click)="
-                  applyForJob(match)
-                ">
+                (click)="applyForJob(match)">
 
                 {{
-                  applyingJobId
-                    ===
-                  match.jobId
+                  applyingJobId ===
+                    (match.jobId ?? match.id)
 
                     ? 'Applying...'
 
@@ -1134,19 +1452,18 @@
               </button>
 
 
-
               <p
                 class="job-requirement"
                 *ngIf="
                   !isApplied(
-                    match.jobId
+                    match.jobId ?? match.id
                   )
                   &&
                   !canApplyForJob(match)
                 ">
 
                 {{
-                  applicationRequirementMessage
+                  getJobReadinessMessage(match)
                 }}
 
               </p>
@@ -1154,12 +1471,9 @@
             </div>
 
 
-
             <div
               class="empty-message"
-              *ngIf="
-                matchedJobs.length === 0
-              ">
+              *ngIf="matchedJobs.length === 0">
 
               No matching internal jobs found.
 
@@ -1170,10 +1484,9 @@
         </section>
 
 
-
-        <!-- ==========================================
-             MY APPLICATIONS
-        =========================================== -->
+        <!-- ===================================================
+             APPLICATIONS
+        ==================================================== -->
 
         <section class="section">
 
@@ -1188,51 +1501,55 @@
             </h2>
 
             <p>
-              Track your internal job applications.
+              Track your internal job applications here.
             </p>
 
           </div>
 
 
-          <div class="jobs-grid">
+          <div
+            class="application-grid"
+            *ngIf="myApplications.length > 0">
+
 
             <article
-              class="job-card"
-              *ngFor="
-                let application
-                of myApplications
-              ">
+              class="application-card"
+              *ngFor="let application of myApplications">
 
 
-              <div class="job-card-header">
+              <div class="application-header">
 
                 <div>
+
+                  <span class="application-label">
+                    INTERNAL OPPORTUNITY
+                  </span>
 
                   <h3>
 
                     {{
                       application.jobTitle
                       ||
-                      'Internal Opportunity'
+                      application.jobPosting?.title
+                      ||
+                      application.job?.title
+                      ||
+                      'Internal Job'
                     }}
 
                   </h3>
 
-                  <p>
-                    {{
-                      application.jobDepartment
-                      ||
-                      '-'
-                    }}
-                  </p>
-
                 </div>
 
 
-                <span class="open-badge">
+                <span class="application-status">
 
                   {{
                     application.status
+                    ||
+                    application.applicationStatus
+                    ||
+                    'APPLIED'
                   }}
 
                 </span>
@@ -1240,56 +1557,86 @@
               </div>
 
 
-              <div class="job-info">
+              <div class="application-details">
 
-                <span>
+                <div>
 
-                  Applied:
+                  <span>
+                    Department
+                  </span>
 
                   <strong>
 
                     {{
-                      application.appliedDate
+                      application.jobDepartment
+                      ||
+                      application.jobPosting?.department
+                      ||
+                      application.job?.department
                       ||
                       '-'
                     }}
 
                   </strong>
 
-                </span>
+                </div>
 
 
-                <span>
+                <div>
 
-                  Match:
+                  <span>
+                    Match Score
+                  </span>
 
                   <strong>
 
                     {{
                       application.matchScore
-                      || 0
+                      ??
+                      application.overallMatchScore
+                      ??
+                      0
                     }}%
 
                   </strong>
 
-                </span>
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Applied Date
+                  </span>
+
+                  <strong>
+
+                    {{
+                      application.appliedDate
+                      ||
+                      application.createdAt
+                      ||
+                      '-'
+                    }}
+
+                  </strong>
+
+                </div>
 
               </div>
 
 
               <button
                 *ngIf="
-                  application.status
-                    ===
-                  'APPLIED'
+                  (
+                    application.status
+                    ||
+                    application.applicationStatus
+                  ) === 'APPLIED'
                 "
-                class="withdraw-button"
                 type="button"
-                (click)="
-                  withdrawApplication(
-                    application
-                  )
-                ">
+                class="withdraw-button"
+                (click)="withdrawApplication(application)">
 
                 Withdraw Application
 
@@ -1302,9 +1649,7 @@
 
           <div
             class="empty-message"
-            *ngIf="
-              myApplications.length === 0
-            ">
+            *ngIf="myApplications.length === 0">
 
             You have not applied for any jobs yet.
 
@@ -1313,10 +1658,9 @@
         </section>
 
 
-
-        <!-- ==========================================
+        <!-- ===================================================
              CAREER PATHS
-        =========================================== -->
+        ==================================================== -->
 
         <section class="section">
 
@@ -1331,8 +1675,7 @@
             </h2>
 
             <p>
-              Compare available career paths
-              and required competencies.
+              Choose a career path and view the exact skills required.
             </p>
 
           </div>
@@ -1340,12 +1683,10 @@
 
           <div class="career-path-grid">
 
+
             <article
               class="path-card"
-              *ngFor="
-                let path
-                of careerPaths
-              ">
+              *ngFor="let path of careerPaths">
 
 
               <div class="path-top">
@@ -1367,7 +1708,6 @@
                   <p class="target-role">
 
                     Target:
-
                     {{ path.targetRole }}
 
                   </p>
@@ -1379,7 +1719,8 @@
 
                   {{
                     path.minExperienceYears
-                    || 0
+                    ??
+                    0
                   }}+ yrs
 
                 </span>
@@ -1405,16 +1746,46 @@
 
                 <span
                   class="skill-tag"
-                  *ngFor="
-                    let skill
-                    of path.requiredSkillList
-                  ">
+                  *ngFor="let skill of path.requiredSkillList">
 
                   {{ skill }}
 
                 </span>
 
               </div>
+
+
+              <h4>
+                Recommended Courses
+              </h4>
+
+
+              <div class="course-list">
+
+                <span
+                  *ngFor="
+                    let course of path.recommendedCourseList
+                  ">
+
+                  {{ course }}
+
+                </span>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="primary-button"
+                (click)="selectCareerPath(path)">
+
+                {{
+                  targetRole === path.targetRole
+                    ? 'Current Career'
+                    : 'Select This Career'
+                }}
+
+              </button>
 
             </article>
 
@@ -1423,10 +1794,9 @@
         </section>
 
 
-
-        <!-- ==========================================
+        <!-- ===================================================
              OPEN JOBS
-        =========================================== -->
+        ==================================================== -->
 
         <section class="section">
 
@@ -1441,8 +1811,7 @@
             </h2>
 
             <p>
-              Explore internal roles available
-              within the organization.
+              See required skills before applying.
             </p>
 
           </div>
@@ -1450,12 +1819,10 @@
 
           <div class="jobs-grid">
 
+
             <article
               class="job-card"
-              *ngFor="
-                let job
-                of jobs
-              ">
+              *ngFor="let job of jobs">
 
 
               <div class="job-card-header">
@@ -1509,7 +1876,8 @@
 
                     {{
                       job.minExperienceYears
-                      || 0
+                      ??
+                      0
                     }}+ years
 
                   </strong>
@@ -1534,41 +1902,80 @@
               </div>
 
 
-              <h4>
+              <h4 class="job-skills-heading">
                 Required Skills
               </h4>
 
 
-              <p class="required-skills">
+              <div class="job-required-skills">
 
-                {{
-                  job.requiredSkills
-                }}
+                <span
+                  class="job-skill-tag"
+                  *ngFor="
+                    let skill of getJobRequiredSkills(job)
+                  ">
 
-              </p>
+                  {{ skill }}
 
+                </span>
+
+              </div>
+
+
+              <div
+                class="missing-job-skills"
+                *ngIf="
+                  getMissingJobSkills(job).length > 0
+                ">
+
+                <strong>
+                  Skills you still need
+                </strong>
+
+
+                <div class="missing-skill-list">
+
+                  <span
+                    class="missing-job-skill-tag"
+                    *ngFor="
+                      let skill of getMissingJobSkills(job)
+                    ">
+
+                    ✗ {{ skill }}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div
+                class="all-job-skills"
+                *ngIf="
+                  getJobRequiredSkills(job).length > 0
+                  &&
+                  getMissingJobSkills(job).length === 0
+                ">
+
+                ✓ You have all the required skills.
+
+              </div>
 
 
               <span
-                *ngIf="
-                  isApplied(job.id)
-                "
+                *ngIf="isApplied(job.id)"
                 class="eligibility-badge eligible">
 
                 {{
-                  getApplicationStatus(
-                    job.id
-                  )
+                  getApplicationStatus(job.id)
                 }}
 
               </span>
 
 
-
               <button
-                *ngIf="
-                  !isApplied(job.id)
-                "
+                *ngIf="!isApplied(job.id)"
                 class="primary-button"
                 type="button"
                 [disabled]="
@@ -1576,9 +1983,7 @@
                   ||
                   !canApplyForJob(job)
                 "
-                (click)="
-                  applyForJob(job)
-                ">
+                (click)="applyForJob(job)">
 
                 {{
                   applyingJobId === job.id
@@ -1604,7 +2009,7 @@
                 ">
 
                 {{
-                  applicationRequirementMessage
+                  getJobReadinessMessage(job)
                 }}
 
               </p>
@@ -1615,16 +2020,115 @@
 
         </section>
 
+        <!-- ===================================================
+             CAREER ASSISTANT
+        ==================================================== -->
+
+        <section class="dashboard-panel career-ai-panel">
+
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">CAREER ASSISTANT</p>
+              <h2>Career Assistant</h2>
+              <p class="career-ai-description">
+                Ask questions about your career goal, skills, learning path,
+                promotion readiness and internal opportunities.
+              </p>
+            </div>
+          </div>
+
+          <div class="career-ai-quick-actions">
+            <button type="button" class="ai-quick-button"
+              (click)="askCareerQuestion('What should I learn next?')">
+              What should I learn next?
+            </button>
+            <button type="button" class="ai-quick-button"
+              (click)="askCareerQuestion('How can I improve my career readiness?')">
+              Improve my readiness
+            </button>
+            <button type="button" class="ai-quick-button"
+              (click)="askCareerQuestion('Which skills am I missing for my target role?')">
+              Show my skill gaps
+            </button>
+          </div>
+
+          <div class="career-ai-chat-window">
+
+            <div class="career-ai-empty" *ngIf="chatMessages.length === 0">
+              <strong>Start a conversation</strong>
+              <span>
+                Try asking: “What should I learn next?”
+              </span>
+            </div>
+
+            <div
+              class="career-ai-message"
+              *ngFor="let message of chatMessages"
+              [class.user-message]="message.sender === 'user'"
+              [class.assistant-message]="message.sender === 'assistant'">
+
+              <div class="career-ai-message-label">
+                {{ message.sender === 'user' ? 'You' : 'Career Assistant' }}
+              </div>
+
+              <div class="career-ai-message-text">
+                {{ message.text }}
+              </div>
+
+            </div>
+
+            <div class="career-ai-loading" *ngIf="chatLoading">
+              Career Assistant is preparing a response...
+            </div>
+
+          </div>
+
+          <div class="career-ai-error" *ngIf="chatError">
+            {{ chatError }}
+          </div>
+
+          <form class="career-ai-input-area" (ngSubmit)="sendCareerChat()">
+
+            <input
+              type="text"
+              name="careerChatMessage"
+              [(ngModel)]="chatMessage"
+              [disabled]="chatLoading"
+              placeholder="Ask something about your career..."
+              autocomplete="off" />
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="chatLoading || !chatMessage.trim()">
+              {{ chatLoading ? 'Sending...' : 'Send' }}
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="chatLoading || chatMessages.length === 0"
+              (click)="clearCareerChat()">
+              Clear
+            </button>
+
+          </form>
+
+          <p class="career-ai-note">
+            Career Assistant uses your current career information to provide
+            guidance. It does not make final hiring or promotion decisions.
+          </p>
+
+        </section>
 
       </ng-container>
 
     </ng-container>
 
 
-
-    <!-- ==================================================
+    <!-- =======================================================
          ADMIN / HR
-    =================================================== -->
+    ======================================================== -->
 
     <ng-container
       *ngIf="
@@ -1633,6 +2137,8 @@
         authService.isHR()
       ">
 
+
+      <!-- ADMIN / HR HEADER -->
 
       <header class="page-header">
 
@@ -1653,16 +2159,20 @@
           </h1>
 
           <p class="page-description">
+
             Manage career pathways,
             promotion criteria,
             internal opportunities
             and workforce development.
+
           </p>
 
         </div>
 
       </header>
 
+
+      <!-- ADMIN / HR LOADING -->
 
       <div
         class="loading-box"
@@ -1673,6 +2183,8 @@
       </div>
 
 
+      <!-- ADMIN / HR ERROR -->
+
       <div
         class="error-box"
         *ngIf="errorMessage">
@@ -1682,12 +2194,13 @@
       </div>
 
 
-
       <ng-container
         *ngIf="!loading">
 
 
-        <!-- SUMMARY -->
+        <!-- ===================================================
+             ADMIN SUMMARY
+        ==================================================== -->
 
         <section class="summary-grid">
 
@@ -1761,8 +2274,9 @@
         </section>
 
 
-
-        <!-- TRAINING -->
+        <!-- ===================================================
+             TRAINING ANALYTICS
+        ==================================================== -->
 
         <section
           class="dashboard-panel"
@@ -1785,43 +2299,36 @@
           </div>
 
 
-          <div class="management-grid">
+          <div class="analytics-charts-grid">
 
-            <div class="management-item">
+            <div class="analytics-chart-card">
 
-              <span>
-                Total Enrollments
-              </span>
+              <div class="analytics-chart-header">
+                <div>
+                  <span>TRAINING PERFORMANCE</span>
+                  <h3>Training Effectiveness</h3>
+                </div>
+              </div>
 
-              <strong>
-                {{ totalEnrollments }}
-              </strong>
-
-            </div>
-
-
-            <div class="management-item">
-
-              <span>
-                Completion Rate
-              </span>
-
-              <strong>
-                {{ completionRate }}%
-              </strong>
+              <div class="analytics-chart-container">
+                <canvas id="trainingEffectivenessChart"></canvas>
+              </div>
 
             </div>
 
 
-            <div class="management-item">
+            <div class="analytics-chart-card">
 
-              <span>
-                Average Progress
-              </span>
+              <div class="analytics-chart-header">
+                <div>
+                  <span>WORKFORCE OVERVIEW</span>
+                  <h3>Development Overview</h3>
+                </div>
+              </div>
 
-              <strong>
-                {{ averageProgress }}%
-              </strong>
+              <div class="analytics-chart-container">
+                <canvas id="workforceOverviewChart"></canvas>
+              </div>
 
             </div>
 
@@ -1830,8 +2337,9 @@
         </section>
 
 
-
-        <!-- PROMOTION CRITERIA -->
+        <!-- ===================================================
+             PROMOTION MANAGEMENT
+        ==================================================== -->
 
         <section class="section">
 
@@ -1845,11 +2353,6 @@
               Promotion Criteria
             </h2>
 
-            <p>
-              Criteria used to evaluate
-              employee promotion readiness.
-            </p>
-
           </div>
 
 
@@ -1857,10 +2360,7 @@
 
             <article
               class="path-card"
-              *ngFor="
-                let criteria
-                of promotionCriteria
-              ">
+              *ngFor="let criteria of promotionCriteria">
 
               <span class="department-badge">
                 PROMOTION
@@ -1890,9 +2390,9 @@
 
                   {{
                     criteria.minimumRequiredScore
-                    ||
+                    ??
                     criteria.minimumScore
-                    ||
+                    ??
                     0
                   }}%
 
@@ -1904,8 +2404,7 @@
               <div
                 class="score-row"
                 *ngIf="
-                  criteria.minimumExperienceYears
-                  != null
+                  criteria.minimumExperienceYears != null
                 ">
 
                 <span>
@@ -1929,8 +2428,9 @@
         </section>
 
 
-
-        <!-- CAREER PATHS -->
+        <!-- ===================================================
+             CAREER PATH MANAGEMENT
+        ==================================================== -->
 
         <section class="section">
 
@@ -1944,11 +2444,6 @@
               Available Career Paths
             </h2>
 
-            <p>
-              Review organizational career
-              development pathways.
-            </p>
-
           </div>
 
 
@@ -1956,10 +2451,8 @@
 
             <article
               class="path-card"
-              *ngFor="
-                let path
-                of careerPaths
-              ">
+              *ngFor="let path of careerPaths">
+
 
               <div class="path-top">
 
@@ -1980,7 +2473,6 @@
                   <p class="target-role">
 
                     Target:
-
                     {{ path.targetRole }}
 
                   </p>
@@ -1992,7 +2484,8 @@
 
                   {{
                     path.minExperienceYears
-                    || 0
+                    ??
+                    0
                   }}+ yrs
 
                 </span>
@@ -2019,8 +2512,7 @@
                 <span
                   class="skill-tag"
                   *ngFor="
-                    let skill
-                    of path.requiredSkillList
+                    let skill of path.requiredSkillList
                   ">
 
                   {{ skill }}
@@ -2039,8 +2531,7 @@
 
                 <span
                   *ngFor="
-                    let course
-                    of path.recommendedCourseList
+                    let course of path.recommendedCourseList
                   ">
 
                   {{ course }}
@@ -2056,8 +2547,9 @@
         </section>
 
 
-
-        <!-- JOB POSTINGS -->
+        <!-- ===================================================
+             INTERNAL OPPORTUNITIES
+        ==================================================== -->
 
         <section class="section">
 
@@ -2071,11 +2563,6 @@
               Job Postings
             </h2>
 
-            <p>
-              Review open internal career
-              opportunities available to employees.
-            </p>
-
           </div>
 
 
@@ -2083,10 +2570,8 @@
 
             <article
               class="job-card"
-              *ngFor="
-                let job
-                of jobs
-              ">
+              *ngFor="let job of jobs">
+
 
               <div class="job-card-header">
 
@@ -2111,9 +2596,7 @@
 
                 <span class="open-badge">
 
-                  {{
-                    job.status
-                  }}
+                  {{ job.status }}
 
                 </span>
 
@@ -2122,9 +2605,7 @@
 
               <p class="job-description">
 
-                {{
-                  job.description
-                }}
+                {{ job.description }}
 
               </p>
 
@@ -2139,7 +2620,8 @@
 
                     {{
                       job.minExperienceYears
-                      || 0
+                      ??
+                      0
                     }}+ years
 
                   </strong>
@@ -2152,7 +2634,9 @@
                   Type:
 
                   <strong>
+
                     {{ job.employmentType }}
+
                   </strong>
 
                 </span>
@@ -2160,18 +2644,24 @@
               </div>
 
 
-              <h4>
+              <h4 class="job-skills-heading">
                 Required Skills
               </h4>
 
 
-              <p class="required-skills">
+              <div class="job-required-skills">
 
-                {{
-                  job.requiredSkills
-                }}
+                <span
+                  class="job-skill-tag"
+                  *ngFor="
+                    let skill of getJobRequiredSkills(job)
+                  ">
 
-              </p>
+                  {{ skill }}
+
+                </span>
+
+              </div>
 
             </article>
 
@@ -2179,11 +2669,9 @@
 
         </section>
 
-
       </ng-container>
 
     </ng-container>
-
 
   </main>
 

@@ -5,7 +5,9 @@ import com.enterpriselearning.entity.*;
 import com.enterpriselearning.exception.ResourceNotFoundException;
 import com.enterpriselearning.repository.*;
 import com.enterpriselearning.service.JobMatchingService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,16 +19,21 @@ import java.util.stream.Collectors;
 public class JobMatchingServiceImpl implements JobMatchingService {
 
     private final JobPostingRepository jobPostingRepository;
+
     private final JobApplicationRepository jobApplicationRepository;
+
     private final UserRepository userRepository;
+
     private final EmployeeSkillRepository employeeSkillRepository;
+
     private final CourseRepository courseRepository;
+
     private final CertificationRepository certificationRepository;
 
 
-    // ==========================================
+    // ============================================================
     // MATCH EMPLOYEE WITH JOB
-    // ==========================================
+    // ============================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -65,9 +72,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
-    // MATCH LOGGED IN USER WITH JOB
-    // ==========================================
+    // ============================================================
+    // MATCH LOGGED-IN USER WITH JOB
+    // ============================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -106,14 +113,13 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // FIND MATCHED JOBS FOR EMPLOYEE
-    // ==========================================
+    // ============================================================
 
     @Override
     @Transactional(readOnly = true)
-    public List<JobMatchResponse>
-    findMatchedJobsForEmployee(
+    public List<JobMatchResponse> findMatchedJobsForEmployee(
             Long employeeId,
             Double minScore) {
 
@@ -155,7 +161,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         match ->
                                 match.getOverallMatchScore()
                                         >=
-                                        threshold
+                                threshold
                 )
                 .sorted(
                         Comparator
@@ -171,14 +177,13 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
-    // FIND MATCHED JOBS FOR LOGGED USER
-    // ==========================================
+    // ============================================================
+    // FIND MATCHED JOBS FOR LOGGED-IN USER
+    // ============================================================
 
     @Override
     @Transactional(readOnly = true)
-    public List<JobMatchResponse>
-    findMatchedJobsForMe(
+    public List<JobMatchResponse> findMatchedJobsForMe(
             String userEmail,
             Double minScore) {
 
@@ -220,7 +225,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         match ->
                                 match.getOverallMatchScore()
                                         >=
-                                        threshold
+                                threshold
                 )
                 .sorted(
                         Comparator
@@ -236,14 +241,13 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // FIND MATCHED CANDIDATES FOR JOB
-    // ==========================================
+    // ============================================================
 
     @Override
     @Transactional(readOnly = true)
-    public List<CandidateMatchResponse>
-    findMatchedCandidatesForJob(
+    public List<CandidateMatchResponse> findMatchedCandidatesForJob(
             Long jobId,
             Double minScore) {
 
@@ -260,16 +264,11 @@ public class JobMatchingServiceImpl implements JobMatchingService {
 
 
         /*
-         * IMPORTANT:
-         *
-         * Old code used Role.MANAGER.
-         * We changed the final platform roles to:
+         * Platform roles:
          *
          * ADMIN
          * HR
          * EMPLOYEE
-         *
-         * Therefore MANAGER is replaced with HR.
          */
 
         List<User> employees =
@@ -280,11 +279,11 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                                 user ->
                                         user.getRole()
                                                 ==
-                                                Role.EMPLOYEE
+                                        Role.EMPLOYEE
                                         ||
                                         user.getRole()
                                                 ==
-                                                Role.HR
+                                        Role.HR
                         )
                         .collect(
                                 Collectors.toList()
@@ -310,7 +309,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         match ->
                                 match.getOverallMatchScore()
                                         >=
-                                        threshold
+                                threshold
                 )
                 .sorted(
                         Comparator
@@ -326,19 +325,31 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // COMPUTE JOB MATCH
-    // ==========================================
+    // ============================================================
 
     private JobMatchResponse computeJobMatch(
             User employee,
             JobPosting job) {
+
+        /*
+         * ========================================================
+         * REQUIRED JOB SKILLS
+         * ========================================================
+         */
 
         List<String> reqSkills =
                 parseCommaList(
                         job.getRequiredSkills()
                 );
 
+
+        /*
+         * ========================================================
+         * EMPLOYEE SKILLS
+         * ========================================================
+         */
 
         List<EmployeeSkill> empSkills =
                 employeeSkillRepository
@@ -347,8 +358,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         );
 
 
-        Map<String, EmployeeSkill>
-                empSkillMap =
+        Map<String, EmployeeSkill> empSkillMap =
                 new HashMap<>();
 
 
@@ -357,6 +367,15 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 :
                 empSkills
         ) {
+
+            if (
+                    employeeSkill.getSkill() == null
+                    ||
+                    employeeSkill.getSkill().getName() == null
+            ) {
+                continue;
+            }
+
 
             empSkillMap.put(
                     employeeSkill
@@ -370,23 +389,20 @@ public class JobMatchingServiceImpl implements JobMatchingService {
         }
 
 
-        // ==========================================
+        // ========================================================
         // 1. SKILL MATCH
         // MAXIMUM 60 POINTS
-        // ==========================================
+        // ========================================================
 
-        List<SkillMatchDetail>
-                skillDetails =
+        List<SkillMatchDetail> skillDetails =
                 new ArrayList<>();
 
 
-        List<String>
-                matchedSkills =
+        List<String> matchedSkills =
                 new ArrayList<>();
 
 
-        List<String>
-                missingSkills =
+        List<String> missingSkills =
                 new ArrayList<>();
 
 
@@ -406,10 +422,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
 
 
             if (
-                    empSkillMap
-                            .containsKey(
-                                    lower
-                            )
+                    empSkillMap.containsKey(
+                            lower
+                    )
             ) {
 
                 EmployeeSkill employeeSkill =
@@ -540,10 +555,10 @@ public class JobMatchingServiceImpl implements JobMatchingService {
         }
 
 
-        // ==========================================
+        // ========================================================
         // 2. EXPERIENCE MATCH
         // MAXIMUM 25 POINTS
-        // ==========================================
+        // ========================================================
 
         int currentExp =
                 empSkills
@@ -632,10 +647,10 @@ public class JobMatchingServiceImpl implements JobMatchingService {
         }
 
 
-        // ==========================================
+        // ========================================================
         // 3. CERTIFICATION MATCH
         // MAXIMUM 15 POINTS
-        // ==========================================
+        // ========================================================
 
         List<Certification> certifications =
                 certificationRepository
@@ -654,9 +669,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 );
 
 
-        // ==========================================
+        // ========================================================
         // OVERALL MATCH SCORE
-        // ==========================================
+        // ========================================================
 
         double overallScore =
                 Math.min(
@@ -685,9 +700,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 );
 
 
-        // ==========================================
+        // ========================================================
         // GAP ANALYSIS
-        // ==========================================
+        // ========================================================
 
         List<String> gapAnalysis =
                 new ArrayList<>();
@@ -744,23 +759,23 @@ public class JobMatchingServiceImpl implements JobMatchingService {
         }
 
 
-        // ==========================================
+        // ========================================================
         // RECOMMENDED COURSES
-        // ==========================================
+        // ========================================================
 
-        List<CourseResponse>
-                recommendedCourses =
+        List<CourseResponse> recommendedCourses =
                 findCoursesForSkills(
                         missingSkills
                 );
 
 
-        // ==========================================
-        // EXISTING JOB APPLICATION
-        // ==========================================
+        // ========================================================
+        // EXISTING APPLICATION
+        // ========================================================
 
         Optional<JobApplication>
                 existingApplication =
+
                 jobApplicationRepository
                         .findByApplicantIdAndJobPostingId(
                                 employee.getId(),
@@ -768,12 +783,16 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         );
 
 
-        // ==========================================
+        // ========================================================
         // RESPONSE
-        // ==========================================
+        // ========================================================
 
         return JobMatchResponse
                 .builder()
+
+                // ------------------------------------------------
+                // JOB INFORMATION
+                // ------------------------------------------------
 
                 .jobId(
                         job.getId()
@@ -799,6 +818,21 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         reqExp
                 )
 
+                /*
+                 * ADD THE REQUIRED SKILLS HERE
+                 */
+                .requiredSkills(
+                        job.getRequiredSkills()
+                )
+
+                .requiredSkillList(
+                        reqSkills
+                )
+
+                // ------------------------------------------------
+                // EMPLOYEE
+                // ------------------------------------------------
+
                 .employeeId(
                         employee.getId()
                 )
@@ -814,6 +848,10 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 .employeeEmail(
                         employee.getEmail()
                 )
+
+                // ------------------------------------------------
+                // SCORES
+                // ------------------------------------------------
 
                 .overallMatchScore(
                         overallScore
@@ -835,6 +873,10 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         certificationScore
                 )
 
+                // ------------------------------------------------
+                // SKILL DETAILS
+                // ------------------------------------------------
+
                 .skillDetails(
                         skillDetails
                 )
@@ -847,6 +889,10 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         missingSkills
                 )
 
+                // ------------------------------------------------
+                // EXPERIENCE
+                // ------------------------------------------------
+
                 .currentExperienceYears(
                         currentExp
                 )
@@ -855,13 +901,25 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         experienceSatisfied
                 )
 
+                // ------------------------------------------------
+                // GAP ANALYSIS
+                // ------------------------------------------------
+
                 .gapAnalysis(
                         gapAnalysis
                 )
 
+                // ------------------------------------------------
+                // COURSES
+                // ------------------------------------------------
+
                 .recommendedCoursesToBridgeGap(
                         recommendedCourses
                 )
+
+                // ------------------------------------------------
+                // APPLICATION
+                // ------------------------------------------------
 
                 .alreadyApplied(
                         existingApplication
@@ -883,12 +941,11 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // COMPUTE CANDIDATE MATCH
-    // ==========================================
+    // ============================================================
 
-    private CandidateMatchResponse
-    computeCandidateMatch(
+    private CandidateMatchResponse computeCandidateMatch(
             User candidate,
             JobPosting job) {
 
@@ -901,6 +958,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
 
         Optional<JobApplication>
                 existingApplication =
+
                 jobApplicationRepository
                         .findByApplicantIdAndJobPostingId(
                                 candidate.getId(),
@@ -1000,9 +1058,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // PROFICIENCY WEIGHT
-    // ==========================================
+    // ============================================================
 
     private double getProficiencyWeight(
             ProficiencyLevel level) {
@@ -1034,9 +1092,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // COMPATIBILITY LEVEL
-    // ==========================================
+    // ============================================================
 
     private String getCompatibilityLevel(
             double score) {
@@ -1069,24 +1127,20 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
-    // PARSE COMMA SEPARATED VALUES
-    // ==========================================
+    // ============================================================
+    // PARSE COMMA-SEPARATED VALUES
+    // ============================================================
 
-    private List<String>
-    parseCommaList(
+    private List<String> parseCommaList(
             String value) {
 
         if (
                 value == null
                 ||
-                value
-                        .trim()
-                        .isEmpty()
+                value.trim().isEmpty()
         ) {
 
-            return Collections
-                    .emptyList();
+            return Collections.emptyList();
         }
 
 
@@ -1099,8 +1153,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 )
                 .filter(
                         valueItem ->
-                                !valueItem
-                                        .isEmpty()
+                                !valueItem.isEmpty()
                 )
                 .collect(
                         Collectors.toList()
@@ -1108,21 +1161,18 @@ public class JobMatchingServiceImpl implements JobMatchingService {
     }
 
 
-    // ==========================================
+    // ============================================================
     // FIND COURSES FOR MISSING SKILLS
-    // ==========================================
+    // ============================================================
 
-    private List<CourseResponse>
-    findCoursesForSkills(
+    private List<CourseResponse> findCoursesForSkills(
             List<String> missingSkills) {
 
         if (
-                missingSkills
-                        .isEmpty()
+                missingSkills.isEmpty()
         ) {
 
-            return Collections
-                    .emptyList();
+            return Collections.emptyList();
         }
 
 
@@ -1156,7 +1206,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         (
                                 course.getTitle()
                                         !=
-                                        null
+                                null
 
                                 &&
 
@@ -1172,7 +1222,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         (
                                 course.getDescription()
                                         !=
-                                        null
+                                null
 
                                 &&
 
@@ -1188,7 +1238,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                         (
                                 course.getCategory()
                                         !=
-                                        null
+                                null
 
                                 &&
 
@@ -1203,10 +1253,9 @@ public class JobMatchingServiceImpl implements JobMatchingService {
                 if (
                         matches
                         &&
-                        !matchedCourses
-                                .contains(
-                                        course
-                                )
+                        !matchedCourses.contains(
+                                course
+                        )
                 ) {
 
                     matchedCourses.add(
@@ -1219,9 +1268,7 @@ public class JobMatchingServiceImpl implements JobMatchingService {
 
         return matchedCourses
                 .stream()
-                .limit(
-                        5
-                )
+                .limit(5)
                 .map(
                         course ->
 

@@ -1,12 +1,14 @@
-<div class="analytics-page">
+<div class="app-layout">
 
-  <!-- ================================= -->
-  <!-- SIDEBAR -->
-  <!-- ================================= -->
+  <!-- ============================================================
+       SIDEBAR
+  ============================================================= -->
 
   <aside class="sidebar">
 
     <div class="brand">
+
+      <div class="brand-mark"></div>
 
       <div class="brand-title">
         Enterprise Learning
@@ -19,63 +21,107 @@
     </div>
 
 
+    <div class="sidebar-line"></div>
+
+
     <nav class="nav-menu">
 
       <a
         routerLink="/dashboard"
-        routerLinkActive="active">
-        Dashboard
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Dashboard</span>
+
       </a>
 
 
       <a
-        *ngIf="authService.canViewEmployees()"
+        *ngIf="authService.canManageEmployees()"
         routerLink="/employees"
-        routerLinkActive="active">
-        Employees
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Employees</span>
+
       </a>
 
 
       <a
         routerLink="/learning"
-        routerLinkActive="active">
-        Learning
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Learning</span>
+
       </a>
 
 
       <a
         routerLink="/skills"
-        routerLinkActive="active">
-        Skills
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Skills</span>
+
       </a>
 
 
       <a
         routerLink="/certifications"
-        routerLinkActive="active">
-        Certifications
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Certifications</span>
+
       </a>
 
 
       <a
         routerLink="/career"
-        routerLinkActive="active">
-        Career
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Career</span>
+
       </a>
 
 
       <a
         *ngIf="authService.canViewAnalytics()"
         routerLink="/analytics"
-        routerLinkActive="active">
-        Analytics
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Analytics</span>
+
       </a>
 
 
       <a
         routerLink="/settings"
-        routerLinkActive="active">
-        Settings
+        routerLinkActive="active"
+        class="nav-item">
+
+        <span class="nav-icon"></span>
+
+        <span>Settings</span>
+
       </a>
 
     </nav>
@@ -83,975 +129,601 @@
   </aside>
 
 
-  <!-- ================================= -->
-  <!-- MAIN CONTENT -->
-  <!-- ================================= -->
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================= -->
 
   <main class="main-content">
 
 
-    <ng-container
-      *ngIf="authService.canViewAnalytics()">
+    <!-- ==========================================================
+         TOP HEADER
+    =========================================================== -->
+
+    <header class="top-header">
+
+      <div>
+
+        <div class="page-kicker">
+          ADMINISTRATION
+        </div>
+
+        <h1>
+          Analytics
+        </h1>
+
+      </div>
 
 
-      <!-- ================================= -->
-      <!-- HEADER -->
-      <!-- ================================= -->
+      <div class="header-right">
 
-      <header class="page-header">
+        <span class="header-status">
+
+          <span class="status-dot"></span>
+
+          Live Data
+
+        </span>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- ==========================================================
+         PAGE
+    =========================================================== -->
+
+    <section class="analytics-page">
+
+
+      <!-- INTRO -->
+
+      <div class="analytics-intro">
 
         <div>
 
-          <p class="eyebrow">
+          <div class="section-label">
+            LEARNING INSIGHTS
+          </div>
 
-            {{
-              authService.isAdmin()
-                ? 'ADMIN ANALYTICS'
-                : 'HR ANALYTICS'
-            }}
-
-          </p>
-
-
-          <h1>
-            Enterprise Analytics
-          </h1>
-
+          <h2>
+            Training & Workforce Analytics
+          </h2>
 
           <p>
-            Monitor workforce,
-            learning, skills,
-            certifications and
-            career development across
-            the Enterprise Learning Platform.
+            Monitor learning activity, employee progress,
+            completion performance and workforce development.
           </p>
 
         </div>
 
-
-        <button
-          class="refresh-btn"
-          type="button"
-          (click)="refresh()">
-
-          Refresh Analytics
-
-        </button>
-
-      </header>
+      </div>
 
 
-      <!-- ================================= -->
-      <!-- LOADING -->
-      <!-- ================================= -->
+
+      <!-- ========================================================
+           LOADING
+      ========================================================= -->
 
       <div
-        class="loading"
+        class="analytics-loading"
         *ngIf="loading">
 
-        Loading enterprise analytics...
+        <div class="loading-spinner"></div>
+
+        <span>
+          Loading analytics...
+        </span>
 
       </div>
 
+
+
+      <!-- ========================================================
+           ERROR
+      ========================================================= -->
 
       <div
-        class="error-message"
-        *ngIf="errorMessage">
+        class="analytics-error"
+        *ngIf="errorMessage && !loading">
 
-        {{ errorMessage }}
+        <strong>
+          Unable to load analytics
+        </strong>
+
+        <span>
+          {{ errorMessage }}
+        </span>
 
       </div>
 
 
-      <ng-container
+
+      <!-- ========================================================
+           KPI CARDS
+      ========================================================= -->
+
+      <section
+        class="analytics-kpi-grid"
         *ngIf="!loading">
 
 
-        <!-- ================================= -->
-        <!-- PLATFORM OVERVIEW -->
-        <!-- ================================= -->
+        <article class="analytics-kpi-card">
 
-        <section class="section-block">
+          <div class="kpi-label">
+            TRAINING COURSES
+          </div>
 
-          <div class="section-heading">
+          <div class="kpi-value">
+            {{ totalCourses }}
+          </div>
 
-            <p class="orange-label">
-              PLATFORM OVERVIEW
-            </p>
+          <div class="kpi-description">
+            Available learning courses
+          </div>
+
+        </article>
 
 
-            <h2>
-              Enterprise Learning Summary
-            </h2>
 
+        <article class="analytics-kpi-card">
+
+          <div class="kpi-label">
+            TOTAL ENROLLMENTS
+          </div>
+
+          <div class="kpi-value">
+            {{ totalEnrollments }}
+          </div>
+
+          <div class="kpi-description">
+            Employee course enrollments
+          </div>
+
+        </article>
+
+
+
+        <article class="analytics-kpi-card">
+
+          <div class="kpi-label">
+            COMPLETION RATE
+          </div>
+
+          <div class="kpi-value">
+            {{ completionRate }}%
+          </div>
+
+          <div class="kpi-description">
+            Overall training completion
+          </div>
+
+        </article>
+
+
+
+        <article class="analytics-kpi-card">
+
+          <div class="kpi-label">
+            AVERAGE PROGRESS
+          </div>
+
+          <div class="kpi-value">
+            {{ averageProgress }}%
+          </div>
+
+          <div class="kpi-description">
+            Average employee progress
+          </div>
+
+        </article>
+
+      </section>
+
+
+
+      <!-- ========================================================
+           TRAINING + WORKFORCE
+      ========================================================= -->
+
+      <section
+        class="chart-grid"
+        *ngIf="!loading">
+
+
+        <!-- TRAINING -->
+
+        <article class="analytics-panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <div class="section-label">
+                PERFORMANCE
+              </div>
+
+              <h3>
+                Training Performance
+              </h3>
+
+              <p>
+                Employee progress compared with overall completion.
+              </p>
+
+            </div>
+
+            <span class="panel-badge">
+              %
+            </span>
+
+          </div>
+
+
+          <div class="chart-container">
+
+            <canvas
+              #trainingChart>
+            </canvas>
+
+          </div>
+
+        </article>
+
+
+
+        <!-- WORKFORCE -->
+
+        <article class="analytics-panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <div class="section-label">
+                WORKFORCE
+              </div>
+
+              <h3>
+                Learning Activity
+              </h3>
+
+              <p>
+                Available courses and employee participation.
+              </p>
+
+            </div>
+
+            <span class="panel-badge">
+              COUNT
+            </span>
+
+          </div>
+
+
+          <div class="chart-container">
+
+            <canvas
+              #workforceChart>
+            </canvas>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+
+      <!-- ========================================================
+           CAREER DEVELOPMENT
+      ========================================================= -->
+
+      <section
+        class="analytics-panel career-panel"
+        *ngIf="!loading">
+
+
+        <div class="panel-header">
+
+          <div>
+
+            <div class="section-label">
+              CAREER DEVELOPMENT
+            </div>
+
+            <h3>
+              Career Development Overview
+            </h3>
 
             <p>
-              Consolidated information from
-              employee, learning, skill and
-              certification services.
+              Career paths, promotion criteria and internal opportunities.
             </p>
 
           </div>
 
-
-          <div class="stats-grid">
-
-
-            <article class="stat-card">
-
-              <span>
-                Total Employees
-              </span>
-
-              <strong>
-                {{ totalEmployees }}
-              </strong>
-
-              <small>
-                Registered workforce
-              </small>
-
-            </article>
+        </div>
 
 
-            <article class="stat-card">
 
-              <span>
-                Active Employees
-              </span>
+        <!-- REAL CAREER GRAPH -->
 
-              <strong>
-                {{ activeEmployees }}
-              </strong>
+        <div
+          class="career-chart-wrapper"
+          *ngIf="hasCareerData">
 
-              <small>
-                Currently active users
-              </small>
+          <div class="career-chart-container">
 
-            </article>
-
-
-            <article class="stat-card">
-
-              <span>
-                Learning Courses
-              </span>
-
-              <strong>
-                {{ totalCourses }}
-              </strong>
-
-              <small>
-                Available learning courses
-              </small>
-
-            </article>
-
-
-            <article class="stat-card">
-
-              <span>
-                Certifications
-              </span>
-
-              <strong>
-                {{ issuedCertificates }}
-              </strong>
-
-              <small>
-                Issued credentials
-              </small>
-
-            </article>
+            <canvas
+              #careerChart>
+            </canvas>
 
           </div>
 
-        </section>
 
+          <div class="career-metrics">
 
-        <!-- ================================= -->
-        <!-- WORKFORCE + LEARNING -->
-        <!-- ================================= -->
-
-        <section class="content-grid">
-
-
-          <!-- ================================= -->
-          <!-- ROLE DISTRIBUTION -->
-          <!-- ================================= -->
-
-          <article class="panel">
-
-            <div class="panel-title">
-
-              <div>
-
-                <p class="orange-label">
-                  WORKFORCE
-                </p>
-
-                <h2>
-                  Role Distribution
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div class="analytics-row">
+            <div class="career-metric">
 
               <span>
-                Employees
+                Career Paths
               </span>
 
               <strong>
-                {{ employeeCount }}
+                {{ careerPaths }}
               </strong>
 
             </div>
 
 
-            <div class="analytics-row">
+            <div class="career-metric">
 
               <span>
-                HR
+                Promotion Criteria
               </span>
 
               <strong>
-                {{ hrCount }}
+                {{ promotionCriteria }}
               </strong>
 
             </div>
 
 
-            <div class="analytics-row">
+            <div class="career-metric">
 
               <span>
-                Administrators
+                Open Jobs
               </span>
 
               <strong>
-                {{ adminCount }}
+                {{ openJobs }}
               </strong>
 
             </div>
 
+          </div>
 
-            <div class="analytics-row">
+        </div>
 
-              <span>
-                Total Workforce
-              </span>
 
-              <strong>
-                {{ totalEmployees }}
-              </strong>
 
+        <!-- NO CAREER DATA -->
+
+        <div
+          class="no-data-box"
+          *ngIf="!hasCareerData">
+
+          <div class="no-data-title">
+            No career analytics data available
+          </div>
+
+          <div class="no-data-text">
+            Career paths, promotion criteria and open job
+            information will appear here when records are available.
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ========================================================
+           OPEN JOBS
+      ========================================================= -->
+
+      <section
+        class="analytics-panel"
+        *ngIf="!loading && openJobs > 0">
+
+
+        <div class="panel-header">
+
+          <div>
+
+            <div class="section-label">
+              OPPORTUNITIES
             </div>
 
-          </article>
-
-
-          <!-- ================================= -->
-          <!-- PLATFORM RESOURCES -->
-          <!-- ================================= -->
-
-          <article class="panel">
-
-            <div class="panel-title">
-
-              <div>
-
-                <p class="orange-label">
-                  LEARNING ECOSYSTEM
-                </p>
-
-                <h2>
-                  Platform Resources
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Courses
-              </span>
-
-              <strong>
-                {{ totalCourses }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Skills
-              </span>
-
-              <strong>
-                {{ totalSkills }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Certificates
-              </span>
-
-              <strong>
-                {{ totalCertificates }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Issued Certificates
-              </span>
-
-              <strong>
-                {{ issuedCertificates }}
-              </strong>
-
-            </div>
-
-          </article>
-
-        </section>
-
-
-        <!-- ================================= -->
-        <!-- DEPARTMENT ANALYTICS -->
-        <!-- ================================= -->
-
-        <section class="content-grid">
-
-          <article class="panel">
-
-            <div class="panel-title">
-
-              <div>
-
-                <p class="orange-label">
-                  DEPARTMENTS
-                </p>
-
-                <h2>
-                  Employees by Department
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div
-              class="analytics-row"
-              *ngFor="
-                let item
-                of employeesByDepartment
-              ">
-
-              <span>
-                {{ item.key }}
-              </span>
-
-              <strong>
-                {{ item.value }}
-              </strong>
-
-            </div>
-
-
-            <div
-              class="empty-state"
-              *ngIf="
-                employeesByDepartment.length === 0
-              ">
-
-              No department information available.
-
-            </div>
-
-          </article>
-
-
-          <!-- ================================= -->
-          <!-- BASIC PLATFORM STATUS -->
-          <!-- ================================= -->
-
-          <article class="panel">
-
-            <div class="panel-title">
-
-              <div>
-
-                <p class="orange-label">
-                  PLATFORM STATUS
-                </p>
-
-                <h2>
-                  System Overview
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Employee Records
-              </span>
-
-              <strong>
-                {{ totalEmployees }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Learning Resources
-              </span>
-
-              <strong>
-                {{ totalCourses }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Skill Catalog
-              </span>
-
-              <strong>
-                {{ totalSkills }}
-              </strong>
-
-            </div>
-
-
-            <div class="analytics-row">
-
-              <span>
-                Credential Records
-              </span>
-
-              <strong>
-                {{ totalCertificates }}
-              </strong>
-
-            </div>
-
-          </article>
-
-        </section>
-
-
-        <!-- ================================= -->
-        <!-- SKILL & CAREER GUIDANCE -->
-        <!-- ================================= -->
-
-        <section
-          class="section-block"
-          *ngIf="dashboardAnalytics">
-
-          <div class="section-heading">
-
-            <p class="orange-label">
-              SKILL & CAREER GUIDANCE
-            </p>
-
-
-            <h2>
-              Skill Development Insights
-            </h2>
-
+            <h3>
+              Open Job Opportunities
+            </h3>
 
             <p>
-              Skill analytics used for
-              employee development,
-              gap identification and
-              career guidance.
+              Current internal positions available in the platform.
             </p>
 
           </div>
 
 
-          <div class="stats-grid compact-grid">
+          <span class="jobs-count">
+            {{ openJobs }} OPEN
+          </span>
+
+        </div>
 
 
-            <article class="stat-card">
+        <div class="jobs-chart-container">
 
-              <span>
-                Platform Skills
-              </span>
+          <canvas
+            #jobsChart>
+          </canvas>
 
-              <strong>
-                {{ totalSkills }}
-              </strong>
+        </div>
 
-              <small>
-                Skills available in Skill Service
-              </small>
-
-            </article>
+      </section>
 
 
-            <article class="stat-card">
 
-              <span>
-                Career Profile Skills
-              </span>
+      <!-- ========================================================
+           SUMMARY
+      ========================================================= -->
 
-              <strong>
-                {{ careerProfiledSkills }}
-              </strong>
-
-              <small>
-                Skills used in career analysis
-              </small>
-
-            </article>
+      <section
+        class="analytics-summary-panel"
+        *ngIf="!loading">
 
 
-            <article class="stat-card">
+        <div class="section-label">
+          SUMMARY
+        </div>
 
-              <span>
-                Skill Assignments
-              </span>
+        <h3>
+          Analytics Summary
+        </h3>
 
-              <strong>
-                {{ skillAssignments }}
-              </strong>
 
-              <small>
-                Employee skill mappings
-              </small>
+        <div class="summary-grid">
 
-            </article>
+
+          <div class="summary-item">
+
+            <span>
+              Training Courses
+            </span>
+
+            <strong>
+              {{ totalCourses }}
+            </strong>
 
           </div>
 
 
-          <div class="content-grid single-feature-grid">
+          <div class="summary-item">
 
-            <article class="panel">
+            <span>
+              Enrollments
+            </span>
 
-              <div class="panel-title">
-
-                <div>
-
-                  <p class="orange-label">
-                    PROFICIENCY
-                  </p>
-
-                  <h2>
-                    Career Skill Proficiency
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              <div
-                class="analytics-row"
-                *ngFor="
-                  let item
-                  of objectEntries(
-                    dashboardAnalytics
-                      ?.skillStats
-                      ?.proficiencyDistribution
-                  )
-                ">
-
-                <span>
-                  {{ item.key }}
-                </span>
-
-                <strong>
-                  {{ item.value }}
-                </strong>
-
-              </div>
-
-
-              <div
-                class="empty-state"
-                *ngIf="
-                  objectEntries(
-                    dashboardAnalytics
-                      ?.skillStats
-                      ?.proficiencyDistribution
-                  ).length === 0
-                ">
-
-                No proficiency information available.
-
-              </div>
-
-            </article>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================================= -->
-        <!-- TRAINING ANALYTICS -->
-        <!-- ================================= -->
-
-        <section
-          class="section-block"
-          *ngIf="trainingAnalytics">
-
-          <div class="section-heading">
-
-            <p class="orange-label">
-              LEARNING & TRAINING
-            </p>
-
-
-            <h2>
-              Training Effectiveness
-            </h2>
-
-
-            <p>
-              Track learner participation,
-              course progress and
-              completion performance.
-            </p>
+            <strong>
+              {{ totalEnrollments }}
+            </strong>
 
           </div>
 
 
-          <div class="stats-grid">
+          <div class="summary-item">
 
+            <span>
+              Average Progress
+            </span>
 
-            <article class="stat-card">
-
-              <span>
-                Total Enrollments
-              </span>
-
-              <strong>
-                {{ trainingEnrollments }}
-              </strong>
-
-              <small>
-                Training enrollments
-              </small>
-
-            </article>
-
-
-            <article class="stat-card">
-
-              <span>
-                Completed
-              </span>
-
-              <strong>
-                {{ completedEnrollments }}
-              </strong>
-
-              <small>
-                Completed enrollments
-              </small>
-
-            </article>
-
-
-            <article class="stat-card">
-
-              <span>
-                Completion Rate
-              </span>
-
-              <strong>
-                {{ completionPercentage }}%
-              </strong>
-
-              <small>
-                Overall completion
-              </small>
-
-            </article>
-
-
-            <article class="stat-card">
-
-              <span>
-                Average Progress
-              </span>
-
-              <strong>
-                {{ averageProgress }}%
-              </strong>
-
-              <small>
-                Average learner progress
-              </small>
-
-            </article>
+            <strong>
+              {{ averageProgress }}%
+            </strong>
 
           </div>
 
 
-          <div class="content-grid">
+          <div class="summary-item">
 
+            <span>
+              Completion Rate
+            </span>
 
-            <!-- ================================= -->
-            <!-- ENROLLMENT STATUS -->
-            <!-- ================================= -->
-
-            <article class="panel">
-
-              <div class="panel-title">
-
-                <div>
-
-                  <p class="orange-label">
-                    PROGRESS
-                  </p>
-
-                  <h2>
-                    Enrollment Status
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Completed
-                </span>
-
-                <strong>
-                  {{ completedEnrollments }}
-                </strong>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  In Progress
-                </span>
-
-                <strong>
-                  {{ inProgressEnrollments }}
-                </strong>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Not Started
-                </span>
-
-                <strong>
-                  {{ notStartedEnrollments }}
-                </strong>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Training Hours Completed
-                </span>
-
-                <strong>
-                  {{ trainingHours }}
-                </strong>
-
-              </div>
-
-            </article>
-
-
-            <!-- ================================= -->
-            <!-- PARTICIPATION -->
-            <!-- ================================= -->
-
-            <article class="panel">
-
-              <div class="panel-title">
-
-                <div>
-
-                  <p class="orange-label">
-                    PARTICIPATION
-                  </p>
-
-                  <h2>
-                    Learner Participation
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Participating Learners
-                </span>
-
-                <strong>
-                  {{ learnerCount }}
-                </strong>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Participation Rate
-                </span>
-
-                <strong>
-                  {{ participationRate }}%
-                </strong>
-
-              </div>
-
-
-              <div class="analytics-row">
-
-                <span>
-                  Training Courses
-                </span>
-
-                <strong>
-                  {{ trainingCourses }}
-                </strong>
-
-              </div>
-
-            </article>
+            <strong>
+              {{ completionRate }}%
+            </strong>
 
           </div>
 
 
-          <!-- ================================= -->
-          <!-- COURSE CATEGORY ANALYTICS -->
-          <!-- ================================= -->
+          <div class="summary-item">
 
-          <div class="content-grid single-feature-grid">
+            <span>
+              Career Paths
+            </span>
 
-            <article class="panel">
-
-              <div class="panel-title">
-
-                <div>
-
-                  <p class="orange-label">
-                    COURSE CATEGORIES
-                  </p>
-
-                  <h2>
-                    Enrollments by Category
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              <div
-                class="analytics-row"
-                *ngFor="
-                  let item
-                  of objectEntries(
-                    trainingAnalytics
-                      ?.enrollmentsByCategory
-                  )
-                ">
-
-                <span>
-                  {{ item.key }}
-                </span>
-
-                <strong>
-                  {{ item.value }}
-                </strong>
-
-              </div>
-
-
-              <div
-                class="empty-state"
-                *ngIf="
-                  objectEntries(
-                    trainingAnalytics
-                      ?.enrollmentsByCategory
-                  ).length === 0
-                ">
-
-                No category information available.
-
-              </div>
-
-            </article>
+            <strong>
+              {{ careerPaths }}
+            </strong>
 
           </div>
 
-        </section>
+
+          <div class="summary-item">
+
+            <span>
+              Promotion Criteria
+            </span>
+
+            <strong>
+              {{ promotionCriteria }}
+            </strong>
+
+          </div>
 
 
-      </ng-container>
+          <div class="summary-item">
 
-    </ng-container>
+            <span>
+              Open Jobs
+            </span>
+
+            <strong>
+              {{ openJobs }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
 
 
-    <!-- ================================= -->
-    <!-- ACCESS DENIED -->
-    <!-- ================================= -->
 
-    <div
-      class="access-denied"
-      *ngIf="
-        !authService.canViewAnalytics()
-      ">
+      <!-- ========================================================
+           INFORMATION
+      ========================================================= -->
 
-      Analytics is available only
-      for Administrator and
-      HR users.
+      <section class="analytics-info-panel">
 
-    </div>
+        <div class="info-icon">
+          i
+        </div>
 
+        <div>
+
+          <h4>
+            About these analytics
+          </h4>
+
+          <p>
+            These analytics combine training, workforce and career
+            information from the SkillSphere platform. Use them to
+            understand employee learning progress, completion
+            performance and available development opportunities.
+          </p>
+
+        </div>
+
+      </section>
+
+
+    </section>
 
   </main>
 

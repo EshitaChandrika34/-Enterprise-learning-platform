@@ -13,38 +13,154 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobMatchResponse {
+
+    // ============================================================
+    // JOB INFORMATION
+    // ============================================================
+
     private Long jobId;
+
     private String jobTitle;
+
     private String jobDepartment;
+
     private String jobLocation;
+
     private String employmentType;
+
     private Integer requiredExperienceYears;
-    
+
+
+    /*
+     * Original comma-separated required skills.
+     *
+     * Example:
+     *
+     * "Java, Spring Boot, SQL & Database Design"
+     */
+    private String requiredSkills;
+
+
+    /*
+     * Easy-to-display list of required skills.
+     *
+     * Example:
+     *
+     * [
+     *   "Java",
+     *   "Spring Boot",
+     *   "SQL & Database Design"
+     * ]
+     */
+    private List<String> requiredSkillList;
+
+
+    // ============================================================
+    // EMPLOYEE INFORMATION
+    // ============================================================
+
     private Long employeeId;
+
     private String employeeName;
+
     private String employeeEmail;
-    
-    private double overallMatchScore; // 0 to 100%
-    private String compatibilityLevel; // EXCELLENT (>=85%), GOOD (70-84%), MODERATE (50-69%), LOW (<50%)
-    
-    // Component Scores
-    private double skillScore; // Max 60%
-    private double experienceScore; // Max 25%
-    private double certificationsScore; // Max 15%
-    
-    // Detailed Breakdown
+
+
+    // ============================================================
+    // OVERALL MATCH
+    // ============================================================
+
+    private double overallMatchScore;
+
+    /*
+     * EXCELLENT >= 85
+     * GOOD       >= 70
+     * MODERATE   >= 50
+     * LOW        < 50
+     */
+    private String compatibilityLevel;
+
+
+    // ============================================================
+    // COMPONENT SCORES
+    // ============================================================
+
+    /*
+     * Maximum 60 points.
+     */
+    private double skillScore;
+
+
+    /*
+     * Maximum 25 points.
+     */
+    private double experienceScore;
+
+
+    /*
+     * Maximum 15 points.
+     */
+    private double certificationsScore;
+
+
+    // ============================================================
+    // DETAILED SKILL BREAKDOWN
+    // ============================================================
+
+    /*
+     * Contains one entry for every required skill.
+     *
+     * Each entry tells the frontend:
+     *
+     * - skill name
+     * - whether employee has it
+     * - proficiency
+     * - experience
+     * - earned weight
+     */
     private List<SkillMatchDetail> skillDetails;
+
+
+    /*
+     * Skills the employee already has.
+     */
     private List<String> matchedSkills;
+
+
+    /*
+     * Required skills the employee is missing.
+     */
     private List<String> missingSkills;
-    
+
+
+    // ============================================================
+    // EXPERIENCE
+    // ============================================================
+
     private Integer currentExperienceYears;
+
     private boolean experienceSatisfied;
-    
-    // Gap Analysis & Learning Recommendations
+
+
+    // ============================================================
+    // GAP ANALYSIS
+    // ============================================================
+
     private List<String> gapAnalysis;
+
+
+    // ============================================================
+    // COURSE RECOMMENDATIONS
+    // ============================================================
+
     private List<CourseResponse> recommendedCoursesToBridgeGap;
-    
-    // Application Info
+
+
+    // ============================================================
+    // APPLICATION INFORMATION
+    // ============================================================
+
     private boolean alreadyApplied;
+
     private JobApplicationStatus applicationStatus;
 }

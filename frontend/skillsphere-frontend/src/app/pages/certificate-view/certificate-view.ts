@@ -237,32 +237,98 @@ export class CertificateView implements OnInit {
     enrollmentId: number
   ): void {
 
+    /*
+     * Milestone-4 Learning Service does not
+     * provide GET /enrollments/{id}.
+     *
+     * Therefore we first get the logged-in
+     * employee ID and then request:
+     *
+     * GET /enrollments/employee/{employeeId}
+     */
+
+    const employeeId =
+      this.getEmployeeId();
+
+
+    if (!employeeId) {
+
+      this.loading =
+        false;
+
+      this.errorMessage =
+        'Employee ID not found for the logged-in user.';
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+
+    console.log(
+      'Loading enrollments for employee:',
+      employeeId
+    );
+
+
     this.learningService
-      .getEnrollmentById(
-        enrollmentId
-      )
+      .getEnrollments(employeeId)
       .subscribe({
 
         next: (
-          data: Enrollment
+          enrollments: Enrollment[]
         ) => {
 
           console.log(
-            'CERTIFICATE ENROLLMENT:',
-            data
+            'EMPLOYEE ENROLLMENTS:',
+            enrollments
           );
 
+
+          const matchingEnrollment =
+            enrollments.find(
+              enrollment =>
+                Number(enrollment.enrollmentId)
+                === Number(enrollmentId)
+            );
+
+
+          if (!matchingEnrollment) {
+
+            console.error(
+              'Enrollment not found:',
+              enrollmentId
+            );
+
+            this.loading =
+              false;
+
+            this.errorMessage =
+              'Enrollment information not found.';
+
+            this.cdr.detectChanges();
+
+            return;
+          }
+
+
+          console.log(
+            'CERTIFICATE ENROLLMENT:',
+            matchingEnrollment
+          );
+
+
           this.enrollment =
-            data;
+            matchingEnrollment;
 
 
           /*
            * EMPLOYEE:
-           * Use Milestone-4 logged-in user.
            *
-           * Do NOT send numeric ID 3 to the
-           * old Employee Service because ID
-           * values are different between services.
+           * Use the logged-in user's information.
+           *
+           * Do not call the old Employee Service
+           * with the Learning Service employee ID.
            */
 
           if (
@@ -281,13 +347,28 @@ export class CertificateView implements OnInit {
 
           /*
            * ADMIN / HR:
-           * Existing employee service can still
-           * be used if required.
+           *
+           * Existing Employee Service can be
+           * used when employee information is
+           * required.
            */
 
-          this.loadEmployee(
-            data.employeeId
-          );
+          if (
+            matchingEnrollment.employeeId
+            != null
+          ) {
+
+            this.loadEmployee(
+              matchingEnrollment.employeeId
+            );
+
+          } else {
+
+            this.loading =
+              false;
+
+            this.cdr.detectChanges();
+          }
         },
 
 
@@ -304,14 +385,94 @@ export class CertificateView implements OnInit {
           this.loading =
             false;
 
-          this.errorMessage =
-            'Unable to load enrollment information.';
+
+          if (
+            error?.status === 0
+          ) {
+
+            this.errorMessage =
+              'Cannot connect to Learning Service.';
+
+          } else if (
+            error?.status === 404
+          ) {
+
+            this.errorMessage =
+              'No enrollments found for this employee.';
+
+          } else {
+
+            this.errorMessage =
+              'Unable to load enrollment information.';
+          }
 
 
           this.cdr.detectChanges();
         }
 
       });
+  }
+
+
+  // ==========================================
+  // GET LOGGED-IN EMPLOYEE ID
+  // ==========================================
+
+  private getEmployeeId(): number {
+
+    if (
+      this.loggedUser
+    ) {
+
+      const id =
+        Number(
+          this.loggedUser.id
+          ||
+          this.loggedUser.employeeId
+          ||
+          0
+        );
+
+
+      if (id > 0) {
+
+        return id;
+      }
+    }
+
+
+    const storedUser =
+      localStorage.getItem(
+        'loggedInUser'
+      );
+
+
+    if (!storedUser) {
+
+      return 0;
+    }
+
+
+    try {
+
+      const user =
+        JSON.parse(
+          storedUser
+        );
+
+
+      return Number(
+        user.id
+        ||
+        user.employeeId
+        ||
+        0
+      );
+
+    } catch {
+
+      return 0;
+    }
   }
 
 

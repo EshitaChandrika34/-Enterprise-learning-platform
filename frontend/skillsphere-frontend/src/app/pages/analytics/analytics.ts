@@ -1,33 +1,34 @@
 import {
   Component,
   OnInit,
-  ChangeDetectorRef
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ElementRef,
+  ViewChild
 } from '@angular/core';
 
-import {
-  CommonModule
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
+
+import { RouterModule } from '@angular/router';
 
 import {
-  RouterModule
-} from '@angular/router';
+  Chart,
+  registerables
+} from 'chart.js';
 
-import {
-  forkJoin,
-  of
-} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
-import {
-  catchError
-} from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 
-import {
-  DashboardService
-} from '../../services/dashboard';
+import { catchError } from 'rxjs/operators';
 
-import {
-  AuthService
-} from '../../services/auth';
+import { AuthService } from '../../services/auth';
+
+import { CareerService } from '../../services/career';
+
+
+Chart.register(...registerables);
 
 
 @Component({
@@ -44,78 +45,116 @@ import {
 
   styleUrl: './analytics.css'
 })
-export class Analytics implements OnInit {
 
 
-  // ==========================================
-  // EXISTING PLATFORM DATA
-  // ==========================================
-
-  employees: any[] = [];
-
-  courses: any[] = [];
-
-  skills: any[] = [];
-
-  certifications: any[] = [];
+export class Analytics
+  implements OnInit, AfterViewInit, OnDestroy {
 
 
-  // ==========================================
-  // CAREER / ANALYTICS DATA FROM 8090
-  // ==========================================
+  // ============================================================
+  // CONFIGURATION
+  // ============================================================
 
-  dashboardAnalytics: any = null;
+  private readonly API_URL =
+    'http://localhost:8090';
 
-  trainingAnalytics: any = null;
+
+  // ============================================================
+  // CHART REFERENCES
+  // ============================================================
+
+  @ViewChild('trainingChart')
+  private trainingChartElement?: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('workforceChart')
+  private workforceChartElement?: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('careerChart')
+  private careerChartElement?: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('jobsChart')
+  private jobsChartElement?: ElementRef<HTMLCanvasElement>;
 
 
-  // ==========================================
-  // PAGE STATE
-  // ==========================================
+  // ============================================================
+  // CHART INSTANCES
+  // ============================================================
 
-  loading = true;
+  private trainingChart: Chart | null = null;
+
+  private workforceChart: Chart | null = null;
+
+  private careerChart: Chart | null = null;
+
+  private jobsChart: Chart | null = null;
+
+
+  // ============================================================
+  // DATA
+  // ============================================================
+
+  analyticsData: any = null;
+
+  careerPathsData: any[] = [];
+
+  promotionCriteriaData: any[] = [];
+
+  jobsData: any[] = [];
+
+
+  // ============================================================
+  // STATE
+  // ============================================================
+
+  loading = false;
 
   errorMessage = '';
 
 
+  // ============================================================
+  // CONSTRUCTOR
+  // ============================================================
+
   constructor(
+    private http: HttpClient,
 
-    private dashboardService:
-      DashboardService,
+    private cdr: ChangeDetectorRef,
 
-    public authService:
-      AuthService,
+    public authService: AuthService,
 
-    private cdr:
-      ChangeDetectorRef
-
+    private careerService: CareerService
   ) {}
 
 
-  // ==========================================
-  // INITIAL LOAD
-  // ==========================================
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
 
   ngOnInit(): void {
 
-    if (
-      !this.authService
-        .canViewAnalytics()
-    ) {
-
-      this.loading = false;
-
-      return;
-    }
-
-
     this.loadAnalytics();
+
   }
 
 
-  // ==========================================
-  // LOAD COMPLETE PLATFORM ANALYTICS
-  // ==========================================
+  // ============================================================
+  // VIEW INITIALIZATION
+  // ============================================================
+
+  ngAfterViewInit(): void {
+
+    setTimeout(() => {
+
+      this.renderCharts();
+
+    });
+
+  }
+
+
+  // ============================================================
+  // LOAD ALL ANALYTICS DATA
+  // ============================================================
 
   loadAnalytics(): void {
 
@@ -126,265 +165,227 @@ export class Analytics implements OnInit {
 
     forkJoin({
 
+      // ------------------------------------------
+      // TRAINING ANALYTICS
+      // ------------------------------------------
 
-      // ======================================
-      // USER SERVICE - 8081
-      // ======================================
+      analytics:
 
-      employees:
-
-        this.dashboardService
-          .getEmployees()
+        this.http
+          .get<any>(
+            `${this.API_URL}/api/analytics/training`
+          )
           .pipe(
 
-            catchError(
-              error => {
+            catchError(error => {
 
-                console.error(
-                  'Employee analytics error:',
-                  error
-                );
+              console.error(
+                'Training analytics error:',
+                error
+              );
 
-                return of([]);
-              }
-            )
+              return of({
+                data: null
+              });
+
+            })
 
           ),
 
 
-      // ======================================
-      // LEARNING SERVICE - 8084
-      // ======================================
+      // ------------------------------------------
+      // CAREER PATHS
+      // ------------------------------------------
 
-      courses:
+      paths:
 
-        this.dashboardService
-          .getCourses()
+        this.http
+          .get<any>(
+            `${this.API_URL}/api/career/paths`
+          )
           .pipe(
 
-            catchError(
-              error => {
+            catchError(error => {
 
-                console.error(
-                  'Course analytics error:',
-                  error
-                );
+              console.error(
+                'Career paths error:',
+                error
+              );
 
-                return of([]);
-              }
-            )
+              return of({
+                data: []
+              });
+
+            })
 
           ),
 
 
-      // ======================================
-      // SKILL SERVICE - 8082
-      // ======================================
+      // ------------------------------------------
+      // PROMOTION CRITERIA
+      // ------------------------------------------
 
-      skills:
+      criteria:
 
-        this.dashboardService
-          .getSkills()
+        this.careerService
+          .getPromotionCriteria()
           .pipe(
 
-            catchError(
-              error => {
+            catchError(error => {
 
-                console.error(
-                  'Skill analytics error:',
-                  error
-                );
+              console.error(
+                'Promotion criteria error:',
+                error
+              );
 
-                return of([]);
-              }
-            )
+              return of({
+                data: []
+              });
+
+            })
 
           ),
 
 
-      // ======================================
-      // CERTIFICATION SERVICE - 8083
-      // ======================================
+      // ------------------------------------------
+      // OPEN JOBS
+      // ------------------------------------------
 
-      certifications:
+      jobs:
 
-        this.dashboardService
-          .getCertifications()
+        this.careerService
+          .getJobs()
           .pipe(
 
-            catchError(
-              error => {
+            catchError(error => {
 
-                console.error(
-                  'Certification analytics error:',
-                  error
-                );
+              console.error(
+                'Jobs error:',
+                error
+              );
 
-                return of([]);
-              }
-            )
+              return of({
+                data: []
+              });
 
-          ),
-
-
-      // ======================================
-      // CAREER ANALYTICS - 8090
-      // ======================================
-
-      dashboard:
-
-        this.dashboardService
-          .getDashboardAnalytics()
-          .pipe(
-
-            catchError(
-              error => {
-
-                console.error(
-                  'Career analytics error:',
-                  error
-                );
-
-                return of(null);
-              }
-            )
-
-          ),
-
-
-      // ======================================
-      // TRAINING ANALYTICS - 8090
-      // ======================================
-
-      training:
-
-        this.dashboardService
-          .getTrainingAnalytics()
-          .pipe(
-
-            catchError(
-              error => {
-
-                console.error(
-                  'Training analytics error:',
-                  error
-                );
-
-                return of(null);
-              }
-            )
+            })
 
           )
 
-
     }).subscribe({
 
+      next: (result: any) => {
 
-      // ======================================
-      // SUCCESS
-      // ======================================
-
-      next: result => {
-
-
-        this.employees =
-          this.extractArray(
-            result.employees
-          );
+        console.log(
+          'Complete Analytics Data:',
+          result
+        );
 
 
-        this.courses =
-          this.extractArray(
-            result.courses
-          );
+        // ==========================================
+        // TRAINING DATA
+        // ==========================================
 
+        this.analyticsData =
 
-        this.skills =
-          this.extractArray(
-            result.skills
-          );
+          result.analytics?.analytics?.data ??
 
+          result.analytics?.data ??
 
-        this.certifications =
-          this.extractArray(
-            result.certifications
-          );
-
-
-        this.dashboardAnalytics =
-
-          result.dashboard?.data
-
-          ||
-
-          result.dashboard
-
-          ||
+          result.analytics ??
 
           null;
 
 
-        this.trainingAnalytics =
+        // ==========================================
+        // CAREER PATHS
+        // ==========================================
 
-          result.training?.data
+        this.careerPathsData =
 
-          ||
+          Array.isArray(
+            result.paths?.data
+          )
 
-          result.training
+            ? result.paths.data
 
-          ||
+            : Array.isArray(result.paths)
 
-          null;
+              ? result.paths
+
+              : [];
 
 
-        console.log(
-          'EMPLOYEES:',
-          this.employees
+        // ==========================================
+        // PROMOTION CRITERIA
+        // ==========================================
+
+        this.promotionCriteriaData =
+
+          Array.isArray(
+            result.criteria?.data
+          )
+
+            ? result.criteria.data
+
+            : Array.isArray(result.criteria)
+
+              ? result.criteria
+
+              : [];
+
+
+        // ==========================================
+        // JOBS
+        // ==========================================
+
+        const allJobs =
+
+          Array.isArray(result.jobs?.data)
+
+            ? result.jobs.data
+
+            : Array.isArray(result.jobs)
+
+              ? result.jobs
+
+              : [];
+
+
+        // Only OPEN jobs
+
+        this.jobsData = allJobs.filter(
+          (job: any) =>
+
+            (
+              job?.status ??
+              ''
+            )
+              .toString()
+              .trim()
+              .toUpperCase() === 'OPEN'
         );
 
 
-        console.log(
-          'COURSES:',
-          this.courses
-        );
-
-
-        console.log(
-          'SKILLS:',
-          this.skills
-        );
-
-
-        console.log(
-          'CERTIFICATIONS:',
-          this.certifications
-        );
-
-
-        console.log(
-          'CAREER ANALYTICS:',
-          this.dashboardAnalytics
-        );
-
-
-        console.log(
-          'TRAINING ANALYTICS:',
-          this.trainingAnalytics
-        );
-
+        // ==========================================
+        // FINISHED
+        // ==========================================
 
         this.loading = false;
 
-
         this.cdr.detectChanges();
+
+
+        setTimeout(() => {
+
+          this.renderCharts();
+
+        });
+
       },
 
 
-      // ======================================
-      // ERROR
-      // ======================================
-
-      error: error => {
+      error: (error) => {
 
         console.error(
           'Analytics loading error:',
@@ -392,713 +393,711 @@ export class Analytics implements OnInit {
         );
 
 
-        this.errorMessage =
-          'Unable to load analytics.';
-
-
         this.loading = false;
 
+        this.errorMessage =
+          'Unable to load analytics data. Please make sure the backend is running.';
 
         this.cdr.detectChanges();
+
       }
 
     });
+
   }
 
 
-  // ==========================================
-  // EXTRACT ARRAY
-  // ==========================================
-
-  private extractArray(
-    response: any
-  ): any[] {
-
-
-    if (
-      Array.isArray(
-        response
-      )
-    ) {
-
-      return response;
-    }
-
-
-    if (
-      Array.isArray(
-        response?.data
-      )
-    ) {
-
-      return response.data;
-    }
-
-
-    return [];
-  }
-
-
-  // ==========================================
-  // TOTAL EMPLOYEES
-  // ==========================================
-
-  get totalEmployees(): number {
-
-    return this.employees.length;
-  }
-
-
-  // ==========================================
-  // ACTIVE EMPLOYEES
-  // ==========================================
-
-  get activeEmployees(): number {
-
-    return this.employees.filter(
-
-      employee => {
-
-
-        const status =
-
-          (
-            employee.status
-            ||
-            'ACTIVE'
-          )
-
-            .toString()
-
-            .trim()
-
-            .toUpperCase();
-
-
-        return (
-          status === 'ACTIVE'
-        );
-      }
-
-    ).length;
-  }
-
-
-  // ==========================================
-  // TOTAL COURSES
-  // ==========================================
+  // ============================================================
+  // TRAINING VALUES
+  // ============================================================
 
   get totalCourses(): number {
 
-    return this.courses.length;
-  }
-
-
-  // ==========================================
-  // TOTAL SKILLS
-  // ==========================================
-
-  get totalSkills(): number {
-
-    return this.skills.length;
-  }
-
-
-  // ==========================================
-  // TOTAL CERTIFICATES
-  // ==========================================
-
-  get totalCertificates(): number {
-
-    return this.certifications.length;
-  }
-
-
-  // ==========================================
-  // EMPLOYEE COUNT
-  // ==========================================
-
-  get employeeCount(): number {
-
-    return this.employees.filter(
-
-      employee => {
-
-
-        const role =
-          this.normalizeRole(
-            employee.role
-          );
-
-
-        return (
-          role === 'EMPLOYEE'
-        );
-      }
-
-    ).length;
-  }
-
-
-  // ==========================================
-  // HR COUNT
-  // ==========================================
-
-  get hrCount(): number {
-
-    return this.employees.filter(
-
-      employee => {
-
-
-        const role =
-          this.normalizeRole(
-            employee.role
-          );
-
-
-        return (
-          role === 'HR'
-        );
-      }
-
-    ).length;
-  }
-
-
-  // ==========================================
-  // ADMIN COUNT
-  // ==========================================
-
-  get adminCount(): number {
-
-    return this.employees.filter(
-
-      employee => {
-
-
-        const role =
-          this.normalizeRole(
-            employee.role
-          );
-
-
-        return (
-          role === 'ADMIN'
-        );
-      }
-
-    ).length;
-  }
-
-
-  // ==========================================
-  // NORMALIZE ROLE
-  // ==========================================
-
-  private normalizeRole(
-    value: any
-  ): string {
-
-
-    const role =
-
-      (
-        value
-        ||
-        ''
-      )
-
-        .toString()
-
-        .trim()
-
-        .toUpperCase();
-
-
-    // ======================================
-    // ADMIN
-    // ======================================
-
-    if (
-
-      role === 'ADMIN'
-
-      ||
-
-      role === 'ADMINISTRATOR'
-
-      ||
-
-      role === 'ROLE_ADMIN'
-
-      ||
-
-      role === 'ROLE_ADMINISTRATOR'
-
-    ) {
-
-      return 'ADMIN';
-    }
-
-
-    // ======================================
-    // HR
-    // ======================================
-
-    if (
-
-      role === 'HR'
-
-      ||
-
-      role === 'ROLE_HR'
-
-      ||
-
-      role === 'HUMAN RESOURCE'
-
-      ||
-
-      role === 'HUMAN RESOURCES'
-
-    ) {
-
-      return 'HR';
-    }
-
-
-    // ======================================
-    // EMPLOYEE
-    // ======================================
-
-    if (
-
-      role === 'EMPLOYEE'
-
-      ||
-
-      role === 'USER'
-
-      ||
-
-      role === 'ROLE_EMPLOYEE'
-
-      ||
-
-      role === 'ROLE_USER'
-
-    ) {
-
-      return 'EMPLOYEE';
-    }
-
-
-    return role;
-  }
-
-
-  // ==========================================
-  // ISSUED CERTIFICATES
-  // ==========================================
-
-  get issuedCertificates(): number {
-
-    return this.certifications.filter(
-
-      certificate => {
-
-
-        const status =
-
-          (
-            certificate.status
-
-            ||
-
-            certificate.certificateStatus
-
-            ||
-
-            ''
-          )
-
-            .toString()
-
-            .trim()
-
-            .toUpperCase();
-
-
-        if (
-
-          status === 'ISSUED'
-
-          ||
-
-          status === 'ACTIVE'
-
-          ||
-
-          status === 'VALID'
-
-        ) {
-
-          return true;
-        }
-
-
-        return (
-
-          certificate.certificateId
-          !=
-          null
-
-          ||
-
-          certificate.id
-          !=
-          null
-
-          ||
-
-          !!certificate.certificateNumber
-
-        );
-      }
-
-    ).length;
-  }
-
-
-  // ==========================================
-  // SKILL ASSIGNMENTS
-  // ==========================================
-
-  get skillAssignments(): number {
-
-    return (
-
-      this.dashboardAnalytics
-
-        ?.skillStats
-
-        ?.totalSkillAssignments
-
-      ||
-
-      0
-
+    return Number(
+      this.analyticsData?.totalCourses ?? 0
     );
+
   }
 
 
-  // ==========================================
-  // CAREER PROFILE SKILLS
-  // ==========================================
+  get totalEnrollments(): number {
 
-  get careerProfiledSkills(): number {
-
-    return (
-
-      this.dashboardAnalytics
-
-        ?.skillStats
-
-        ?.totalSkills
-
-      ||
-
-      0
-
+    return Number(
+      this.analyticsData?.totalEnrollments ?? 0
     );
+
   }
 
 
-  // ==========================================
-  // TOTAL TRAINING ENROLLMENTS
-  // ==========================================
+  get completionRate(): number {
 
-  get trainingEnrollments(): number {
-
-    return (
-
-      this.trainingAnalytics
-
-        ?.totalEnrollments
-
-      ||
-
-      0
-
+    return Number(
+      this.analyticsData?.overallCompletionPercentage ?? 0
     );
+
   }
 
-
-  // ==========================================
-  // COMPLETED ENROLLMENTS
-  // ==========================================
-
-  get completedEnrollments(): number {
-
-    return (
-
-      this.trainingAnalytics
-
-        ?.completedEnrollments
-
-      ||
-
-      0
-
-    );
-  }
-
-
-  // ==========================================
-  // IN PROGRESS
-  // ==========================================
-
-  get inProgressEnrollments(): number {
-
-    return (
-
-      this.trainingAnalytics
-
-        ?.inProgressEnrollments
-
-      ||
-
-      0
-
-    );
-  }
-
-
-  // ==========================================
-  // NOT STARTED
-  // ==========================================
-
-  get notStartedEnrollments(): number {
-
-    return (
-
-      this.trainingAnalytics
-
-        ?.notStartedEnrollments
-
-      ||
-
-      0
-
-    );
-  }
-
-
-  // ==========================================
-  // COMPLETION PERCENTAGE
-  // ==========================================
-
-  get completionPercentage(): number {
-
-    return (
-
-      this.trainingAnalytics
-
-        ?.overallCompletionPercentage
-
-      ||
-
-      0
-
-    );
-  }
-
-
-  // ==========================================
-  // AVERAGE TRAINING PROGRESS
-  // ==========================================
 
   get averageProgress(): number {
 
-    return (
-
-      this.trainingAnalytics
-
-        ?.averageTrainingProgressPercentage
-
-      ||
-
-      0
-
+    return Number(
+      this.analyticsData?.averageTrainingProgressPercentage ?? 0
     );
+
   }
 
 
-  // ==========================================
-  // TRAINING HOURS
-  // ==========================================
+  // ============================================================
+  // CAREER VALUES
+  // ============================================================
 
-  get trainingHours(): number {
+  get careerPaths(): number {
 
-    return (
+    return this.careerPathsData.length;
 
-      this.trainingAnalytics
-
-        ?.totalTrainingHoursCompleted
-
-      ||
-
-      0
-
-    );
   }
 
 
-  // ==========================================
-  // PARTICIPATING LEARNERS
-  // ==========================================
+  get promotionCriteria(): number {
 
-  get learnerCount(): number {
+    return this.promotionCriteriaData.length;
 
-    return (
-
-      this.trainingAnalytics
-
-        ?.totalLearnersParticipating
-
-      ||
-
-      0
-
-    );
   }
 
 
-  // ==========================================
-  // PARTICIPATION RATE
-  // ==========================================
+  get openJobs(): number {
 
-  get participationRate(): number {
+    return this.jobsData.length;
+
+  }
+
+
+  // ============================================================
+  // CAREER DATA AVAILABLE?
+  // ============================================================
+
+  get hasCareerData(): boolean {
 
     return (
 
-      this.trainingAnalytics
+      this.careerPaths > 0 ||
 
-        ?.enterpriseTrainingParticipationRate
+      this.promotionCriteria > 0 ||
 
-      ||
-
-      0
+      this.openJobs > 0
 
     );
+
   }
 
 
-  // ==========================================
-  // TRAINING COURSES
-  // ==========================================
+  // ============================================================
+  // RENDER ALL CHARTS
+  // ============================================================
 
-  get trainingCourses(): number {
+  renderCharts(): void {
 
-    return (
-
-      this.trainingAnalytics
-
-        ?.totalCourses
-
-      ||
-
-      0
-
-    );
-  }
+    this.destroyCharts();
 
 
-  // ==========================================
-  // EMPLOYEES BY DEPARTMENT
-  // ==========================================
+    if (!this.analyticsData) {
 
-  get employeesByDepartment(): any[] {
+      return;
 
-    const result: any = {};
-
-
-    this.employees.forEach(
-
-      employee => {
-
-
-        const department =
-
-          employee.department
-
-          ||
-
-          'Not Assigned';
-
-
-        if (
-          result[department]
-        ) {
-
-          result[department]++;
-
-        } else {
-
-          result[department] = 1;
-        }
-      }
-
-    );
-
-
-    return this.objectEntries(
-      result
-    );
-  }
-
-
-  // ==========================================
-  // OBJECT TO ARRAY
-  // ==========================================
-
-  objectEntries(
-    value: any
-  ): any[] {
-
-
-    if (!value) {
-
-      return [];
     }
 
 
-    return Object.keys(
-      value
-    ).map(
+    this.renderTrainingChart();
 
-      key => ({
+    this.renderWorkforceChart();
 
-        key:
-          key,
 
-        value:
-          value[key]
+    if (this.hasCareerData) {
 
-      })
+      this.renderCareerChart();
 
-    );
+    }
+
+
+    if (this.openJobs > 0) {
+
+      this.renderJobsChart();
+
+    }
+
   }
 
 
-  // ==========================================
-  // REFRESH
-  // ==========================================
+  // ============================================================
+  // TRAINING PERFORMANCE
+  // ============================================================
 
-  refresh(): void {
+  private renderTrainingChart(): void {
 
-    this.loadAnalytics();
+    const canvas =
+      this.trainingChartElement?.nativeElement;
+
+
+    if (!canvas) {
+
+      return;
+
+    }
+
+
+    this.trainingChart =
+
+      new Chart(
+        canvas,
+
+        {
+
+          type: 'bar',
+
+          data: {
+
+            labels: [
+
+              'Average Progress',
+
+              'Completion Rate'
+
+            ],
+
+            datasets: [
+
+              {
+
+                label: 'Percentage',
+
+                data: [
+
+                  this.averageProgress,
+
+                  this.completionRate
+
+                ],
+
+                backgroundColor: [
+
+                  '#ff6a00',
+
+                  '#22c55e'
+
+                ],
+
+                borderRadius: 8,
+
+                borderSkipped: false
+
+              }
+
+            ]
+
+          },
+
+
+          options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+
+            plugins: {
+
+              legend: {
+
+                display: false
+
+              },
+
+
+              tooltip: {
+
+                callbacks: {
+
+                  label: (context) => {
+
+                    return `${context.parsed.y}%`;
+
+                  }
+
+                }
+
+              }
+
+            },
+
+
+            scales: {
+
+              y: {
+
+                beginAtZero: true,
+
+                max: 100,
+
+
+                ticks: {
+
+                  callback: (value) => {
+
+                    return `${value}%`;
+
+                  }
+
+                },
+
+
+                grid: {
+
+                  color:
+                    'rgba(255,255,255,0.07)'
+
+                }
+
+              },
+
+
+              x: {
+
+                grid: {
+
+                  display: false
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      );
+
+  }
+
+
+  // ============================================================
+  // WORKFORCE
+  // ============================================================
+
+  private renderWorkforceChart(): void {
+
+    const canvas =
+      this.workforceChartElement?.nativeElement;
+
+
+    if (!canvas) {
+
+      return;
+
+    }
+
+
+    this.workforceChart =
+
+      new Chart(
+        canvas,
+
+        {
+
+          type: 'bar',
+
+          data: {
+
+            labels: [
+
+              'Courses',
+
+              'Enrollments'
+
+            ],
+
+            datasets: [
+
+              {
+
+                label: 'Count',
+
+                data: [
+
+                  this.totalCourses,
+
+                  this.totalEnrollments
+
+                ],
+
+                backgroundColor: [
+
+                  '#3b82f6',
+
+                  '#ff6a00'
+
+                ],
+
+                borderRadius: 8,
+
+                borderSkipped: false
+
+              }
+
+            ]
+
+          },
+
+
+          options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+
+            plugins: {
+
+              legend: {
+
+                display: false
+
+              }
+
+            },
+
+
+            scales: {
+
+              y: {
+
+                beginAtZero: true,
+
+                ticks: {
+
+                  precision: 0
+
+                },
+
+                grid: {
+
+                  color:
+                    'rgba(255,255,255,0.07)'
+
+                }
+
+              },
+
+
+              x: {
+
+                grid: {
+
+                  display: false
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      );
+
+  }
+
+
+  // ============================================================
+  // CAREER DEVELOPMENT
+  // ============================================================
+
+  private renderCareerChart(): void {
+
+    const canvas =
+      this.careerChartElement?.nativeElement;
+
+
+    if (!canvas) {
+
+      return;
+
+    }
+
+
+    this.careerChart =
+
+      new Chart(
+        canvas,
+
+        {
+
+          type: 'doughnut',
+
+          data: {
+
+            labels: [
+
+              'Career Paths',
+
+              'Promotion Criteria',
+
+              'Open Jobs'
+
+            ],
+
+            datasets: [
+
+              {
+
+                data: [
+
+                  this.careerPaths,
+
+                  this.promotionCriteria,
+
+                  this.openJobs
+
+                ],
+
+                backgroundColor: [
+
+                  '#ff6a00',
+
+                  '#8b5cf6',
+
+                  '#22c55e'
+
+                ],
+
+                borderWidth: 0,
+
+                spacing: 4
+
+              }
+
+            ]
+
+          },
+
+
+          options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            cutout: '65%',
+
+
+            plugins: {
+
+              legend: {
+
+                position: 'bottom',
+
+                labels: {
+
+                  color: '#94a3b8',
+
+                  padding: 18,
+
+                  usePointStyle: true
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      );
+
+  }
+
+
+  // ============================================================
+  // OPEN JOBS
+  // ============================================================
+
+  private renderJobsChart(): void {
+
+    const canvas =
+      this.jobsChartElement?.nativeElement;
+
+
+    if (!canvas || this.openJobs === 0) {
+
+      return;
+
+    }
+
+
+    this.jobsChart =
+
+      new Chart(
+        canvas,
+
+        {
+
+          type: 'bar',
+
+          data: {
+
+            labels: [
+
+              'Open Positions'
+
+            ],
+
+            datasets: [
+
+              {
+
+                label: 'Open Jobs',
+
+                data: [
+
+                  this.openJobs
+
+                ],
+
+                backgroundColor: [
+
+                  '#22c55e'
+
+                ],
+
+                borderRadius: 8,
+
+                borderSkipped: false
+
+              }
+
+            ]
+
+          },
+
+
+          options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+
+            plugins: {
+
+              legend: {
+
+                display: false
+
+              }
+
+            },
+
+
+            scales: {
+
+              y: {
+
+                beginAtZero: true,
+
+                ticks: {
+
+                  precision: 0
+
+                },
+
+                grid: {
+
+                  color:
+                    'rgba(255,255,255,0.07)'
+
+                }
+
+              },
+
+
+              x: {
+
+                grid: {
+
+                  display: false
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      );
+
+  }
+
+
+  // ============================================================
+  // DESTROY CHARTS
+  // ============================================================
+
+  private destroyCharts(): void {
+
+    if (this.trainingChart) {
+
+      this.trainingChart.destroy();
+
+      this.trainingChart = null;
+
+    }
+
+
+    if (this.workforceChart) {
+
+      this.workforceChart.destroy();
+
+      this.workforceChart = null;
+
+    }
+
+
+    if (this.careerChart) {
+
+      this.careerChart.destroy();
+
+      this.careerChart = null;
+
+    }
+
+
+    if (this.jobsChart) {
+
+      this.jobsChart.destroy();
+
+      this.jobsChart = null;
+
+    }
+
+  }
+
+
+  // ============================================================
+  // DESTROY COMPONENT
+  // ============================================================
+
+  ngOnDestroy(): void {
+
+    this.destroyCharts();
+
   }
 
 }

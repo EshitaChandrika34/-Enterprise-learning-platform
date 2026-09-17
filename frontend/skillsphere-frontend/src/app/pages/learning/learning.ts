@@ -19,6 +19,7 @@ import {
 
 import { AuthService } from '../../services/auth';
 
+
 @Component({
   selector: 'app-learning',
   standalone: true,
@@ -82,22 +83,18 @@ export class Learning implements OnInit {
 
     this.loadEnrollments();
 
-    this.loadProgress();
-
     this.loadCertificates();
   }
 
 
   // ==========================================
-  // LOGGED-IN USER DATABASE ID
+  // GET LOGGED-IN EMPLOYEE DATABASE ID
   // ==========================================
 
   getEmployeeId(): number {
 
     const storedUser =
-      localStorage.getItem(
-        'loggedInUser'
-      );
+      localStorage.getItem('loggedInUser');
 
     if (!storedUser) {
       return 0;
@@ -106,20 +103,7 @@ export class Learning implements OnInit {
     try {
 
       const user =
-        JSON.parse(
-          storedUser
-        );
-
-      /*
-       * IMPORTANT:
-       *
-       * id = 3
-       *
-       * employeeId = EMP-DEV-003
-       *
-       * Backend enrollment requires numeric
-       * database user ID.
-       */
+        JSON.parse(storedUser);
 
       return Number(
         user.id || 0
@@ -144,9 +128,7 @@ export class Learning implements OnInit {
       .getCourses()
       .subscribe({
 
-        next: (
-          data: Course[]
-        ) => {
+        next: (data: Course[]) => {
 
           this.courses =
             Array.isArray(data)
@@ -158,9 +140,7 @@ export class Learning implements OnInit {
           this.cdr.detectChanges();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Course loading error:',
@@ -179,21 +159,29 @@ export class Learning implements OnInit {
 
 
   // ==========================================
-  // LOAD ENROLLMENTS
+  // LOAD EMPLOYEE ENROLLMENTS
   // ==========================================
 
   loadEnrollments(): void {
 
+    const employeeId =
+      this.getEmployeeId();
+
+    if (!employeeId) {
+
+      this.enrollments = [];
+
+      return;
+    }
+
     this.learningService
-      .getEnrollments()
+      .getEnrollments(employeeId)
       .subscribe({
 
-        next: (
-          data: Enrollment[]
-        ) => {
+        next: (data: Enrollment[]) => {
 
           console.log(
-            'ENROLLMENTS:',
+            'EMPLOYEE ENROLLMENTS:',
             data
           );
 
@@ -202,12 +190,12 @@ export class Learning implements OnInit {
               ? [...data]
               : [];
 
+          this.buildProgressList();
+
           this.cdr.detectChanges();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Enrollment loading error:',
@@ -215,6 +203,8 @@ export class Learning implements OnInit {
           );
 
           this.enrollments = [];
+
+          this.progressList = [];
 
           this.cdr.detectChanges();
         }
@@ -224,47 +214,47 @@ export class Learning implements OnInit {
 
 
   // ==========================================
-  // LOAD PROGRESS
+  // BUILD PROGRESS FROM ENROLLMENTS
   // ==========================================
 
-  loadProgress(): void {
+  buildProgressList(): void {
 
-    this.learningService
-      .getProgress()
-      .subscribe({
+    this.progressList =
+      this.enrollments
+        .filter(
+          enrollment =>
+            enrollment.enrollmentId != null
+        )
+        .map(
+          enrollment => {
 
-        next: (
-          data: CourseProgress[]
-        ) => {
+            const percentage =
+              Number(
+                enrollment.progressPercentage || 0
+              );
 
-          console.log(
-            'COURSE PROGRESS:',
-            data
-          );
+            return {
 
-          this.progressList =
-            Array.isArray(data)
-              ? [...data]
-              : [];
+              enrollmentId:
+                enrollment.enrollmentId!,
 
-          this.cdr.detectChanges();
-        },
+              progressPercentage:
+                percentage,
 
-        error: (
-          error: any
-        ) => {
+              completionStatus:
+                enrollment.status === 'COMPLETED'
+                  ? 'COMPLETED'
+                  : percentage > 0
+                    ? 'IN_PROGRESS'
+                    : enrollment.status || 'ENROLLED',
 
-          console.error(
-            'Progress loading error:',
-            error
-          );
+              lastUpdatedDate:
+                enrollment.enrollmentDate || ''
 
-          this.progressList = [];
+            };
 
-          this.cdr.detectChanges();
-        }
-
-      });
+          }
+        );
   }
 
 
@@ -290,9 +280,7 @@ export class Learning implements OnInit {
           this.cdr.detectChanges();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Certificate loading error:',
@@ -325,9 +313,7 @@ export class Learning implements OnInit {
     }
 
     return this.courses.filter(
-      (
-        course: Course
-      ) => {
+      (course: Course) => {
 
         const text = `
           ${course.courseName || ''}
@@ -336,9 +322,7 @@ export class Learning implements OnInit {
           ${course.level || ''}
         `.toLowerCase();
 
-        return text.includes(
-          search
-        );
+        return text.includes(search);
       }
     );
   }
@@ -355,7 +339,7 @@ export class Learning implements OnInit {
 
 
   // ==========================================
-  // MY COURSES
+  // MY COURSES COUNT
   // ==========================================
 
   get myCoursesCount(): number {
@@ -369,16 +353,9 @@ export class Learning implements OnInit {
     }
 
     return this.enrollments.filter(
-      (
-        enrollment: Enrollment
-      ) =>
-
-        Number(
-          enrollment.employeeId
-        )
-        ===
-        employeeId
-
+      enrollment =>
+        Number(enrollment.employeeId)
+        === employeeId
     ).length;
   }
 
@@ -405,29 +382,21 @@ export class Learning implements OnInit {
     }
 
     return this.enrollments.find(
-      (
-        enrollment: Enrollment
-      ) =>
+      enrollment =>
 
-        Number(
-          enrollment.courseId
-        )
-        ===
-        Number(courseId)
+        Number(enrollment.courseId)
+        === Number(courseId)
 
         &&
 
-        Number(
-          enrollment.employeeId
-        )
-        ===
-        Number(employeeId)
+        Number(enrollment.employeeId)
+        === Number(employeeId)
     );
   }
 
 
   // ==========================================
-  // ENROLLED?
+  // IS ENROLLED?
   // ==========================================
 
   isEnrolled(
@@ -435,15 +404,14 @@ export class Learning implements OnInit {
   ): boolean {
 
     return (
-      this.getEnrollment(
-        courseId
-      ) !== undefined
+      this.getEnrollment(courseId)
+      !== undefined
     );
   }
 
 
   // ==========================================
-  // GET COURSE PROGRESS RECORD
+  // GET COURSE PROGRESS
   // ==========================================
 
   getCourseProgress(
@@ -451,9 +419,7 @@ export class Learning implements OnInit {
   ): CourseProgress | undefined {
 
     const enrollment =
-      this.getEnrollment(
-        courseId
-      );
+      this.getEnrollment(courseId);
 
     if (
       !enrollment ||
@@ -463,31 +429,30 @@ export class Learning implements OnInit {
       return undefined;
     }
 
-    const matchingProgress =
-      this.progressList.filter(
-        (
-          progress: CourseProgress
-        ) =>
-
-          Number(
-            progress.enrollmentId
-          )
-          ===
-          Number(
-            enrollment.enrollmentId
-          )
+    const percentage =
+      Number(
+        enrollment.progressPercentage || 0
       );
 
-    if (
-      matchingProgress.length === 0
-    ) {
+    return {
 
-      return undefined;
-    }
+      enrollmentId:
+        enrollment.enrollmentId,
 
-    return matchingProgress[
-      matchingProgress.length - 1
-    ];
+      progressPercentage:
+        percentage,
+
+      completionStatus:
+        enrollment.status === 'COMPLETED'
+          ? 'COMPLETED'
+          : percentage > 0
+            ? 'IN_PROGRESS'
+            : enrollment.status || 'ENROLLED',
+
+      lastUpdatedDate:
+        enrollment.enrollmentDate || ''
+
+    };
   }
 
 
@@ -499,18 +464,16 @@ export class Learning implements OnInit {
     courseId: number | undefined
   ): number {
 
-    const progress =
-      this.getCourseProgress(
-        courseId
-      );
+    const enrollment =
+      this.getEnrollment(courseId);
 
-    if (!progress) {
+    if (!enrollment) {
 
       return 0;
     }
 
     return Number(
-      progress.progressPercentage || 0
+      enrollment.progressPercentage || 0
     );
   }
 
@@ -523,35 +486,34 @@ export class Learning implements OnInit {
     courseId: number | undefined
   ): string {
 
-    const progress =
-      this.getCourseProgress(
-        courseId
-      );
-
-    if (progress) {
-
-      return (
-        progress.completionStatus
-        ||
-        'IN_PROGRESS'
-      );
-    }
-
     const enrollment =
-      this.getEnrollment(
-        courseId
-      );
+      this.getEnrollment(courseId);
 
-    if (enrollment) {
+    if (!enrollment) {
 
-      return (
-        enrollment.status
-        ||
-        'ENROLLED'
-      );
+      return 'NOT_STARTED';
     }
 
-    return 'NOT_STARTED';
+    const percentage =
+      Number(
+        enrollment.progressPercentage || 0
+      );
+
+    if (
+      enrollment.status === 'COMPLETED'
+      ||
+      percentage >= 100
+    ) {
+
+      return 'COMPLETED';
+    }
+
+    if (percentage > 0) {
+
+      return 'IN_PROGRESS';
+    }
+
+    return enrollment.status || 'ENROLLED';
   }
 
 
@@ -564,9 +526,7 @@ export class Learning implements OnInit {
   ): LearningCertificate | undefined {
 
     const enrollment =
-      this.getEnrollment(
-        courseId
-      );
+      this.getEnrollment(courseId);
 
     if (
       !enrollment ||
@@ -577,24 +537,17 @@ export class Learning implements OnInit {
     }
 
     return this.certificates.find(
-      (
-        certificate:
-          LearningCertificate
-      ) =>
+      certificate =>
 
-        Number(
-          certificate.enrollmentId
-        )
+        Number(certificate.enrollmentId)
         ===
-        Number(
-          enrollment.enrollmentId
-        )
+        Number(enrollment.enrollmentId)
     );
   }
 
 
   // ==========================================
-  // CERTIFICATE EXISTS?
+  // HAS CERTIFICATE?
   // ==========================================
 
   hasCertificate(
@@ -602,9 +555,8 @@ export class Learning implements OnInit {
   ): boolean {
 
     return (
-      this.getCertificate(
-        courseId
-      ) !== undefined
+      this.getCertificate(courseId)
+      !== undefined
     );
   }
 
@@ -618,9 +570,8 @@ export class Learning implements OnInit {
   ): string {
 
     return (
-      this.getCertificate(
-        courseId
-      )?.certificateNumber
+      this.getCertificate(courseId)
+        ?.certificateNumber
       ||
       ''
     );
@@ -635,34 +586,24 @@ export class Learning implements OnInit {
     courseId: number | undefined
   ): boolean {
 
-    if (
-      !this.isEnrolled(
-        courseId
-      )
-    ) {
+    if (!this.isEnrolled(courseId)) {
 
       return false;
     }
 
-    if (
-      this.hasCertificate(
-        courseId
-      )
-    ) {
+    if (this.hasCertificate(courseId)) {
 
       return false;
     }
 
     return (
-      this.getProgress(
-        courseId
-      ) >= 80
+      this.getProgress(courseId) >= 80
     );
   }
 
 
   // ==========================================
-  // CERTIFICATE REMAINING %
+  // REMAINING FOR CERTIFICATE
   // ==========================================
 
   remainingForCertificate(
@@ -670,13 +611,9 @@ export class Learning implements OnInit {
   ): number {
 
     const progress =
-      this.getProgress(
-        courseId
-      );
+      this.getProgress(courseId);
 
-    if (
-      progress >= 80
-    ) {
+    if (progress >= 80) {
 
       return 0;
     }
@@ -698,9 +635,7 @@ export class Learning implements OnInit {
     this.certificateError = '';
 
     const enrollment =
-      this.getEnrollment(
-        course.courseId
-      );
+      this.getEnrollment(course.courseId);
 
     if (
       !enrollment ||
@@ -714,9 +649,7 @@ export class Learning implements OnInit {
     }
 
     if (
-      this.hasCertificate(
-        course.courseId
-      )
+      this.hasCertificate(course.courseId)
     ) {
 
       this.certificateError =
@@ -735,13 +668,10 @@ export class Learning implements OnInit {
       .subscribe({
 
         next: (
-          result:
-            CertificateEligibility
+          result: CertificateEligibility
         ) => {
 
-          if (
-            !result.eligible
-          ) {
+          if (!result.eligible) {
 
             this.certificateError =
               result.message;
@@ -758,8 +688,7 @@ export class Learning implements OnInit {
             .subscribe({
 
               next: (
-                certificate:
-                  LearningCertificate
+                certificate: LearningCertificate
               ) => {
 
                 this.certificateMessage =
@@ -772,9 +701,7 @@ export class Learning implements OnInit {
                 this.cdr.detectChanges();
               },
 
-              error: (
-                error: any
-              ) => {
+              error: (error: any) => {
 
                 console.error(
                   'Certificate generation error:',
@@ -792,9 +719,7 @@ export class Learning implements OnInit {
             });
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Eligibility error:',
@@ -825,21 +750,10 @@ export class Learning implements OnInit {
 
     this.actionError = '';
 
-    console.log(
-      'START COURSE CLICKED:',
-      course
-    );
-
-    if (
-      course.courseId == null
-    ) {
+    if (course.courseId == null) {
 
       this.actionError =
         'Course ID not found.';
-
-      console.error(
-        this.actionError
-      );
 
       return;
     }
@@ -847,27 +761,16 @@ export class Learning implements OnInit {
     const employeeId =
       this.getEmployeeId();
 
-    console.log(
-      'LOGGED EMPLOYEE DATABASE ID:',
-      employeeId
-    );
-
     if (!employeeId) {
 
       this.actionError =
         'Logged-in employee ID not found.';
 
-      console.error(
-        this.actionError
-      );
-
       return;
     }
 
     if (
-      this.isEnrolled(
-        course.courseId
-      )
+      this.isEnrolled(course.courseId)
     ) {
 
       this.actionMessage =
@@ -876,13 +779,7 @@ export class Learning implements OnInit {
       return;
     }
 
-    const today =
-      new Date()
-        .toISOString()
-        .split('T')[0];
-
-    const enrollment:
-      Enrollment = {
+    const enrollment: Enrollment = {
 
       employeeId:
         employeeId,
@@ -891,10 +788,15 @@ export class Learning implements OnInit {
         course.courseId,
 
       enrollmentDate:
-        today,
+        new Date()
+          .toISOString()
+          .split('T')[0],
 
       status:
-        'ENROLLED'
+        'ENROLLED',
+
+      progressPercentage:
+        0
     };
 
     console.log(
@@ -903,14 +805,11 @@ export class Learning implements OnInit {
     );
 
     this.learningService
-      .createEnrollment(
-        enrollment
-      )
+      .createEnrollment(enrollment)
       .subscribe({
 
         next: (
-          createdEnrollment:
-            Enrollment
+          createdEnrollment: Enrollment
         ) => {
 
           console.log(
@@ -921,87 +820,12 @@ export class Learning implements OnInit {
           this.actionMessage =
             `${course.courseName} started successfully.`;
 
-          if (
-            createdEnrollment
-              .enrollmentId == null
-          ) {
+          this.loadEnrollments();
 
-            this.loadEnrollments();
-
-            this.cdr.detectChanges();
-
-            return;
-          }
-
-          const progress:
-            CourseProgress = {
-
-            enrollmentId:
-              createdEnrollment.enrollmentId,
-
-            progressPercentage:
-              0,
-
-            completionStatus:
-              'IN_PROGRESS',
-
-            lastUpdatedDate:
-              today
-          };
-
-          console.log(
-            'CREATING PROGRESS:',
-            progress
-          );
-
-          this.learningService
-            .createProgress(
-              progress
-            )
-            .subscribe({
-
-              next: (
-                createdProgress:
-                  CourseProgress
-              ) => {
-
-                console.log(
-                  'PROGRESS CREATED:',
-                  createdProgress
-                );
-
-                this.loadEnrollments();
-
-                this.loadProgress();
-
-                this.cdr.detectChanges();
-              },
-
-              error: (
-                error: any
-              ) => {
-
-                console.error(
-                  'Progress creation error:',
-                  error
-                );
-
-                /*
-                 * Enrollment was still created,
-                 * therefore reload enrollments.
-                 */
-
-                this.loadEnrollments();
-
-                this.cdr.detectChanges();
-              }
-
-            });
+          this.cdr.detectChanges();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Enrollment error:',
@@ -1032,17 +856,13 @@ export class Learning implements OnInit {
 
     this.actionError = '';
 
-    if (
-      course.courseId == null
-    ) {
+    if (course.courseId == null) {
 
       return;
     }
 
     const enrollment =
-      this.getEnrollment(
-        course.courseId
-      );
+      this.getEnrollment(course.courseId);
 
     if (
       !enrollment ||
@@ -1055,137 +875,46 @@ export class Learning implements OnInit {
       return;
     }
 
-    const progress =
-      this.getCourseProgress(
-        course.courseId
+    let currentProgress =
+      Number(
+        enrollment.progressPercentage || 0
       );
 
-    const today =
-      new Date()
-        .toISOString()
-        .split('T')[0];
-
-    /*
-     * If enrollment exists but there is
-     * no progress record yet, create one.
-     */
-
-    if (!progress) {
-
-      const newProgress:
-        CourseProgress = {
-
-        enrollmentId:
-          enrollment.enrollmentId,
-
-        progressPercentage:
-          10,
-
-        completionStatus:
-          'IN_PROGRESS',
-
-        lastUpdatedDate:
-          today
-      };
-
-      this.learningService
-        .createProgress(
-          newProgress
-        )
-        .subscribe({
-
-          next: () => {
-
-            this.actionMessage =
-              'Course progress updated to 10%.';
-
-            this.loadProgress();
-
-            this.cdr.detectChanges();
-          },
-
-          error: (
-            error: any
-          ) => {
-
-            console.error(
-              'Progress creation error:',
-              error
-            );
-
-            this.actionError =
-              error?.error?.message
-              ||
-              'Unable to update course progress.';
-
-            this.cdr.detectChanges();
-          }
-
-        });
-
-      return;
-    }
-
-    if (
-      progress.progressId == null
-    ) {
-
-      return;
-    }
-
     let newPercentage =
-      Number(
-        progress
-          .progressPercentage
-        || 0
-      ) + 10;
+      currentProgress + 10;
 
-    if (
-      newPercentage > 100
-    ) {
+    if (newPercentage > 100) {
 
       newPercentage = 100;
     }
 
-    const updatedProgress:
-      CourseProgress = {
-
-      ...progress,
-
-      progressPercentage:
-        newPercentage,
-
-      completionStatus:
-        newPercentage >= 100
-          ? 'COMPLETED'
-          : 'IN_PROGRESS',
-
-      lastUpdatedDate:
-        today
-    };
-
     this.learningService
-      .updateProgress(
-        progress.progressId,
-        updatedProgress
+      .updateEnrollmentProgress(
+        enrollment.enrollmentId,
+        newPercentage
       )
       .subscribe({
 
-        next: () => {
+        next: (
+          updatedEnrollment: Enrollment
+        ) => {
+
+          console.log(
+            'PROGRESS UPDATED:',
+            updatedEnrollment
+          );
 
           this.actionMessage =
             newPercentage >= 100
               ? `${course.courseName} completed successfully.`
               : `Course progress updated to ${newPercentage}%.`;
 
-          this.loadProgress();
+          this.loadEnrollments();
 
           this.cdr.detectChanges();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Progress update error:',
@@ -1195,7 +924,7 @@ export class Learning implements OnInit {
           this.actionError =
             error?.error?.message
             ||
-            'Unable to update progress.';
+            'Unable to update course progress.';
 
           this.cdr.detectChanges();
         }
@@ -1205,14 +934,13 @@ export class Learning implements OnInit {
 
 
   // ==========================================
-  // ADMIN / HR ADD COURSE
+  // ADMIN / HR - ADD COURSE
   // ==========================================
 
   openAddForm(): void {
 
     if (
-      !this.authService
-        .canManageLearning()
+      !this.authService.canManageLearning()
     ) {
 
       return;
@@ -1223,6 +951,7 @@ export class Learning implements OnInit {
     this.editingId = null;
 
     this.course = {
+
       courseName: '',
       description: '',
       trainerName: '',
@@ -1255,29 +984,20 @@ export class Learning implements OnInit {
   saveCourse(): void {
 
     if (
-      !this.authService
-        .canManageLearning()
+      !this.authService.canManageLearning()
     ) {
 
       return;
     }
 
     if (
-      !this.course
-        .courseName
-        ?.trim()
+      !this.course.courseName?.trim()
       ||
-      !this.course
-        .description
-        ?.trim()
+      !this.course.description?.trim()
       ||
-      !this.course
-        .trainerName
-        ?.trim()
+      !this.course.trainerName?.trim()
       ||
-      !this.course
-        .level
-        ?.trim()
+      !this.course.level?.trim()
     ) {
 
       return;
@@ -1303,9 +1023,7 @@ export class Learning implements OnInit {
             this.loadCourses();
           },
 
-          error: (
-            error: any
-          ) => {
+          error: (error: any) => {
 
             console.error(
               'Course update error:',
@@ -1318,9 +1036,7 @@ export class Learning implements OnInit {
     } else {
 
       this.learningService
-        .addCourse(
-          this.course
-        )
+        .addCourse(this.course)
         .subscribe({
 
           next: () => {
@@ -1330,9 +1046,7 @@ export class Learning implements OnInit {
             this.loadCourses();
           },
 
-          error: (
-            error: any
-          ) => {
+          error: (error: any) => {
 
             console.error(
               'Course creation error:',
@@ -1354,8 +1068,7 @@ export class Learning implements OnInit {
   ): void {
 
     if (
-      !this.authService
-        .canManageLearning()
+      !this.authService.canManageLearning()
     ) {
 
       return;
@@ -1364,8 +1077,7 @@ export class Learning implements OnInit {
     this.isEditing = true;
 
     this.editingId =
-      course.courseId
-      ?? null;
+      course.courseId ?? null;
 
     this.course = {
       ...course
@@ -1384,17 +1096,14 @@ export class Learning implements OnInit {
   ): void {
 
     if (
-      !this.authService
-        .canManageLearning()
+      !this.authService.canManageLearning()
     ) {
 
       return;
     }
 
     if (
-      !confirm(
-        'Delete this course?'
-      )
+      !confirm('Delete this course?')
     ) {
 
       return;
@@ -1409,9 +1118,7 @@ export class Learning implements OnInit {
           this.loadCourses();
         },
 
-        error: (
-          error: any
-        ) => {
+        error: (error: any) => {
 
           console.error(
             'Course delete error:',
